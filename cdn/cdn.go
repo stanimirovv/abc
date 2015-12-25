@@ -9,9 +9,9 @@ import (
 func main() {
     flag.Parse()
     
-    glog.Info("Something something")
-    glog.Fatal("Something something")
-    glog.Info("Something something")
+    glog.Info("Something something INfo")
+    glog.Error("Something something Error")
+    glog.Warning("Something something Warning")
 /*
 	    printHello();
 	    http.Handle("/cdn/", http.StripPrefix("/cdn", http.FileServer(http.Dir("<path>"))))
