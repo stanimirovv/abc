@@ -16,6 +16,7 @@ func main() {
     glog.Info("Starting File Server on port 6543")
     http.Handle("/cdn/", http.StripPrefix("/cdn", http.FileServer(http.Dir("."))))
     glog.Info("Starting API Server on port 6543 path")
+    /* TODO add error handling! */
     http.HandleFunc("/api/upload", func(res http.ResponseWriter, req *http.Request) {
 				var (
 				    status int
