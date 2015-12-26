@@ -33,8 +33,13 @@ func main() {
 	 glog.Fatal("Undefinfed var ABC_CDN_DIR!")
     }
 
+    if os.Getenv("ABC_CDN_ENDPOINT_URL") == "" {
+	 glog.Fatal("Undefinfed var ABC_CDN_ENDPOINT_URL!")
+    }
+    ABC_CDN_ENDPOINT_URL := os.Getenv("ABC_CDN_ENDPOINT_URL")
+
     glog.Info(`Starting File Server on port:`, os.Getenv("ABC_CDN_PORTNUM"), `path: `, os.Getenv("ABC_CDN_DIR") )
-    http.Handle("/cdn/", http.StripPrefix("/cdn", http.FileServer(http.Dir("."))))
+    http.Handle("/cdn/", http.StripPrefix("/cdn", http.FileServer(http.Dir(os.Getenv("ABC_CDN_DIR")))))
     glog.Info("Starting API Server...")
     http.HandleFunc("/api/upload", func(res http.ResponseWriter, req *http.Request) {
 				var err error
@@ -60,7 +65,7 @@ func main() {
 					}
 					// open destination  
 					var outfile *os.File
-					outfile, err = os.Create(hdr.Filename)
+					outfile, err = os.Create(os.Getenv("ABC_CDN_DIR") + hdr.Filename)
 					if nil != err {
 					     return
 					}
@@ -69,8 +74,8 @@ func main() {
 					if nil != err || 0 == written {
 					     return
 					}
-					glog.Info("Succesfully uploaded file: ", `path_to_storage` + hdr.Filename)
-					res.Write([]byte(`{"status":"ok", "resource_url":"` + `path_to_storage` + hdr.Filename + `"}`))
+					glog.Info("Succesfully uploaded file: ", ABC_CDN_ENDPOINT_URL + hdr.Filename)
+					res.Write([]byte(`{"status":"ok", "resource_url":"` + ABC_CDN_ENDPOINT_URL + hdr.Filename + `"}`))
 				    }
 				}
     })
