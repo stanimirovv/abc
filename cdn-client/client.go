@@ -53,7 +53,7 @@ func postFile(filename string, targetUrl string) error {
 
 // sample usage
 func main() {
-    target_url := "http://localhost:6543/api-upload"
+    target_url := "http://localhost:6543/api/upload"
     filename := "./a.webm"
     postFile(filename, target_url)
 }
