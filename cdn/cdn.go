@@ -13,15 +13,15 @@ import (
 func main() {
     flag.Parse()
 
-    /* TODO add parametrization 
+    /* TODO add parametrization (maybe) 
 	- server path to cdn TODO
 	- server upload url TODO
     */
 
     /*
-    * issues: files with same name can be overridden
+    * issues that should be solved in the second iteration: 
+    * files with same name can be overridden
     * there is literally no security
-    * They will be solved on the second iteration of the cdn
     */
 
     portNumber, err := strconv.Atoi(os.Getenv("ABC_CDN_PORTNUM"))
