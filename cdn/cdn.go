@@ -14,11 +14,8 @@ func main() {
     flag.Parse()
 
     /* TODO add parametrization 
-	- port number
 	- server path to cdn TODO
-	- server base url 
 	- server upload url TODO
-	- cdn dir
     */
 
     /*
@@ -34,11 +31,13 @@ func main() {
 	glog.Fatal("Error: ", err, portNumber)
     }
 
+    if os.Getenv("ABC_CDN_DIR") == "" {
+	 glog.Fatal("Undefinfed var ABC_CDN_DIR!")
+    }
 
-
-    glog.Info(`Starting File Server on port`, os.Getenv("ABC_CDN_PORTNUM"))
+    glog.Info(`Starting File Server on port:`, os.Getenv("ABC_CDN_PORTNUM"), `path: `, os.Getenv("ABC_CDN_DIR") )
     http.Handle("/cdn/", http.StripPrefix("/cdn", http.FileServer(http.Dir("."))))
-    glog.Info("Starting API Server on port 6543 path")
+    glog.Info("Starting API Server...")
     http.HandleFunc("/api/upload", func(res http.ResponseWriter, req *http.Request) {
 				var err error
 				defer func() {
