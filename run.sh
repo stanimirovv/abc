@@ -1,7 +1,8 @@
 #!/bin/sh
 
 export ABC_CDN_PORTNUM="6540"
-export ABC_CDN_DIR="."
+export ABC_CDN_DIR="/tmp/"
+export ABC_CDN_ENDPOINT_URL="http://localhost:"$ABC_CDN_PORTNUM"/cdn/"
 
 # Run file for the project
 /usr/local/go/bin/go run cdn/cdn.go cdn/xerrors.go -logtostderr=true
