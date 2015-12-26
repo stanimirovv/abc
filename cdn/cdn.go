@@ -24,8 +24,6 @@ func main() {
     * They will be solved on the second iteration of the cdn
     */
 
-    a := os.Getenv("GOPATH1")
-    glog.Info("AAA: ", a)
     portNumber, err := strconv.Atoi(os.Getenv("ABC_CDN_PORTNUM"))
     if nil != err {
 	glog.Fatal("Error: ", err, portNumber)
@@ -71,6 +69,7 @@ func main() {
 					if nil != err || 0 == written {
 					     return
 					}
+					glog.Info("Succesfully uploaded file: ", `path_to_storage` + hdr.Filename)
 					res.Write([]byte(`{"status":"ok", "resource_url":"` + `path_to_storage` + hdr.Filename + `"}`))
 				    }
 				}
