@@ -42,5 +42,5 @@ CREATE TABLE threads(   id serial primary key,
 CREATE TABLE thread_posts(id serial primary key,
                           body text not null,
                           thread_id INT REFERENCES threads,
-                          attachment_url TEXT
+                          attachment_url TEXT);
                           -- todo limits);
