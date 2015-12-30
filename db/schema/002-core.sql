@@ -14,8 +14,8 @@ CREATE TABLE thread_limits_reached_actions(
 );
 
 INSERT INTO thread_limits_reached_actions VALUES(1, 'archive', 'Thread will not be displayed, but present in the admin panel.'); 
-INSERT INTO thread_limits_reached_actions VALUES(1, 'delete', 'Thread will be deleted.'); 
-INSERT INTO thread_limits_reached_actions VALUES(1, 'read_only', 'Thread will be displayed but users will not be able to post in it.'); 
+INSERT INTO thread_limits_reached_actions VALUES(2, 'delete', 'Thread will be deleted.'); 
+INSERT INTO thread_limits_reached_actions VALUES(3, 'read_only', 'Thread will be displayed but users will not be able to post in it.'); 
 
 CREATE TABLE boards(id serial primary key,
                     name text not null,
