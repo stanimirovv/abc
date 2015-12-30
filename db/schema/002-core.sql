@@ -20,6 +20,7 @@ INSERT INTO thread_limits_reached_actions VALUES(3, 'read_only', 'Thread will be
 CREATE TABLE boards(id serial primary key,
                     name text not null,
                     descr text,
+                    image_board_cluster_id INT REFERENCES image_board_clusters,
                     thread_setting_max_thread_count INT NOT NULL default -1,
                     thread_setting_max_posts_per_thread INT NOT NULL default 999999,
                     thread_setting_are_attachments_allowed BOOLEAN NOT NULL DEFAULT FALSE,
