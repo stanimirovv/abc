@@ -10,6 +10,10 @@ import (
     "os"
 )
 
+/*
+* Test client to tryout the upload. It will be removed in the near future
+*/
+
 func postFile(filename string, targetUrl string) error {
     bodyBuf := &bytes.Buffer{}
     bodyWriter := multipart.NewWriter(bodyBuf)
