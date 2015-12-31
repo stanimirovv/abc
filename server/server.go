@@ -15,8 +15,41 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type image_board_clusters struct {
+    id int
+    descr string
+    long_descr string
+    board_limit_count int
+}
 
+type boards struct {
+    id int
+    descr string
+    image_board_cluster_id string
+    board_limit_count int
+}
 
+type threads struct{
+    id int
+    descr string
+    board_id int
+    max_posts_per_thread int
+    are_attachments_allowed bool
+    limits_reached_action_id int
+}
+
+type thread_posts struct{
+    id int
+    body string
+    thread_id int
+    attachment_url int
+}
+
+type thread_limits_reached_actions struct{
+    id	    int
+    name    string
+    descr   string
+}
 // sample usage
 func main() {
     flag.Parse()
