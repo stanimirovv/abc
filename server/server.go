@@ -53,6 +53,11 @@ type thread_limits_reached_actions struct{
     descr   string
 }
 
+type api_request struct{
+    Status  string
+    Msg	    *string
+    Payload interface{}
+}
 
 func getBoards(res http.ResponseWriter, req *http.Request)  error {
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
@@ -63,24 +68,26 @@ func getBoards(res http.ResponseWriter, req *http.Request)  error {
     if err != nil {
 	return xerrors.NewUiErr(err.Error(), err.Error())
     }
-
     defer rows.Close()
+
+    var curr_boards []boards
     for rows.Next() {
 	var board boards
 	err = rows.Scan(&board.Id, &board.Name)
 	if err != nil {
 	    return xerrors.NewUiErr(err.Error(), err.Error())
 	}
-	bytes, err1 := json.Marshal(&board)
-	if err1 != nil {
-	    return xerrors.NewUiErr(err1.Error(), err1.Error())
-	}
-	res.Write(bytes)
+	curr_boards = append(curr_boards, board)
     }
+    bytes, err1 := json.Marshal(api_request{"ok", nil, &curr_boards})
+    if err1 != nil {
+	return xerrors.NewUiErr(err1.Error(), err1.Error())
+    }
+    res.Write(bytes)
     return nil
 }
 
-func getThreads(res http.ResponseWriter, req *http.Request)  error {
+func getThreadsForBoard(res http.ResponseWriter, req *http.Request)  error {
     return nil
 }
 
