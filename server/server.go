@@ -9,6 +9,7 @@ import (
 
 	//API
 	"net/http"
+	"encoding/json"
 
 	//DB
 	"database/sql"
@@ -23,8 +24,9 @@ type image_board_clusters struct {
 }
 
 type boards struct {
-    id int
-    descr string
+    Id int `json:"id"`
+    Name string `json:"name"`
+    Descr string
     image_board_cluster_id string
     board_limit_count int
 }
@@ -64,13 +66,16 @@ func getBoards(res http.ResponseWriter, req *http.Request)  error {
 
     defer rows.Close()
     for rows.Next() {
-	var id int
-	var name string
-	err = rows.Scan(&id, &name)
+	var board boards
+	err = rows.Scan(&board.Id, &board.Name)
 	if err != nil {
 	    return xerrors.NewUiErr(err.Error(), err.Error())
 	}
-	res.Write([]byte(name))
+	bytes, err1 := json.Marshal(&board)
+	if err1 != nil {
+	    return xerrors.NewUiErr(err1.Error(), err1.Error())
+	}
+	res.Write(bytes)
     }
     return nil
 }
