@@ -5,13 +5,13 @@ import (
 	"github.com/golang/glog"
 	_ "github.com/iambc/xerrors"
 	"flag"
+	"github.com/iambc/xerrors"
 
 	//API
 	"net/http"
 
 	//DB
-	"github.com/jmoiron/sqlx"
-	_ "database/sql"
+	"database/sql"
 	_ "github.com/lib/pq"
 )
 
@@ -50,38 +50,64 @@ type thread_limits_reached_actions struct{
     name    string
     descr   string
 }
+
+
+func getBoards(res http.ResponseWriter, req *http.Request)  error {
+    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    if err != nil {
+	return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+    rows, err := dbh.Query("select id, name from boards;")
+    if err != nil {
+	return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+
+    defer rows.Close()
+    for rows.Next() {
+	var id int
+	var name string
+	err = rows.Scan(&id, &name)
+	if err != nil {
+	    return xerrors.NewUiErr(err.Error(), err.Error())
+	}
+	res.Write([]byte(name))
+    }
+    return nil
+}
+
+func getThreads(res http.ResponseWriter, req *http.Request)  error {
+    return nil
+}
+
+func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
+    return nil
+}
 // sample usage
 func main() {
     flag.Parse()
+
+    commands := map[string]func(http.ResponseWriter, *http.Request) error{
+				"get_boards": getBoards,
+			       }
+
     http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
-					//check if function exists, parse parameters to a map[string]string
 					values := req.URL.Query()
-					glog.Info("values: ", values)
 					command, is_passed := values[`command`]
 					if !is_passed {
-					    res.Write([]byte(`Invalid params!`))
+					    res.Write([]byte(`Invalid params: No command name given!`))
 					    return
 					}
-					if command[0] == `get_boards` {
-					    res.Write([]byte(`List of boards:`))
+					_, is_passed = commands[command[0]]
+					if !is_passed{
+					    res.Write([]byte(`Invalid params: No such command!`))
+					    return
 					}
 
-					if command[0] == `get_threads` {
-					    res.Write([]byte(`List of threads:`))
-					}
-
-					if command[0] == `get_post_for_thread` {
-					    res.Write([]byte(`List of posts:`))
-
-					}
-
-					if command[0] == `post_to_thread` {
-					    res.Write([]byte(`Posted new thread!!`))
+					err := commands[command[0]](res, req)
+					if err != nil{
+					    glog.Error(err)
 					}
     })
-
-    //Test db connect
-    _, err := sqlx.Connect("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
 
     http.ListenAndServe(`:8089`, nil)
 }
