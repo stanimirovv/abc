@@ -32,12 +32,13 @@ type boards struct {
 }
 
 type threads struct{
-    id int
-    descr string
-    board_id int
-    max_posts_per_thread int
-    are_attachments_allowed bool
-    limits_reached_action_id int
+    Id int
+    Name string
+    Descr string
+    Board_id int
+    Max_posts_per_thread int
+    Are_attachments_allowed bool
+    Limits_reached_action_id int
 }
 
 type thread_posts struct{
@@ -60,6 +61,10 @@ type api_request struct{
 }
 
 func getBoards(res http.ResponseWriter, req *http.Request)  error {
+    if req == nil {
+	return xerrors.NewSysErr()
+    }
+
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
     if err != nil {
 	return xerrors.NewUiErr(err.Error(), err.Error())
@@ -87,11 +92,52 @@ func getBoards(res http.ResponseWriter, req *http.Request)  error {
     return nil
 }
 
-func getThreadsForBoard(res http.ResponseWriter, req *http.Request)  error {
+func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error {
+    if req == nil {
+        return xerrors.NewSysErr()
+    }
+    values := req.URL.Query()
+    board_id, is_passed := values[`board_id`]
+    if !is_passed {
+	res.Write([]byte(`Invalid params: No board_id given!`))
+	return xerrors.NewUiErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`)
+    }
+
+    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    if err != nil {
+        return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+    rows, err := dbh.Query("select id, name from threads where board_id = $1;", board_id[0])
+    if err != nil {
+        return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+    defer rows.Close()
+
+    var active_threads []threads
+    for rows.Next() {
+	glog.Info("Popped new thread")
+        var thread threads
+        err = rows.Scan(&thread.Id, &thread.Name)
+        if err != nil {
+            return xerrors.NewUiErr(err.Error(), err.Error())
+        }
+        active_threads = append(active_threads, thread)
+    }
+    bytes, err1 := json.Marshal(api_request{"ok", nil, &active_threads})
+    if err1 != nil {
+        return xerrors.NewUiErr(err1.Error(), err1.Error())
+    }
+    res.Write(bytes)
+
     return nil
 }
 
 func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
+    return nil
+}
+
+
+func addPostToThread(res http.ResponseWriter, req *http.Request) error {
     return nil
 }
 // sample usage
@@ -99,7 +145,8 @@ func main() {
     flag.Parse()
 
     commands := map[string]func(http.ResponseWriter, *http.Request) error{
-				"get_boards": getBoards,
+				"getBoards": getBoards,
+				"getActiveThreadsForBoard": getActiveThreadsForBoard,
 			       }
 
     http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
