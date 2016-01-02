@@ -3,7 +3,6 @@ package main
 import (
 	// General
 	"github.com/golang/glog"
-	_ "github.com/iambc/xerrors"
 	"flag"
 	"github.com/iambc/xerrors"
 
@@ -17,18 +16,18 @@ import (
 )
 
 type image_board_clusters struct {
-    id int
-    descr string
-    long_descr string
-    board_limit_count int
+    Id int
+    Descr string
+    LongDescr string
+    BoardLimitCount int
 }
 
 type boards struct {
     Id int `json:"id"`
     Name string `json:"name"`
     Descr string
-    image_board_cluster_id string
-    board_limit_count int
+    ImageBoardCluster_id string
+    BoardLimitCount int
 }
 
 type threads struct{
@@ -36,22 +35,22 @@ type threads struct{
     Name string
     Descr string
     Board_id int
-    Max_posts_per_thread int
-    Are_attachments_allowed bool
-    Limits_reached_action_id int
+    MaxPostsPerThread int
+    AreAttachmentsAllowed bool
+    LimitsReachedActionId int
 }
 
 type thread_posts struct{
-    id int
-    body string
-    thread_id int
-    attachment_url int
+    Id int
+    Body string
+    ThreadId int
+    AttachmentUrl int
 }
 
 type thread_limits_reached_actions struct{
-    id	    int
-    name    string
-    descr   string
+    Id	    int
+    Name    string
+    Descr   string
 }
 
 type api_request struct{
@@ -133,6 +132,43 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error
 }
 
 func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
+    if req == nil {
+        return xerrors.NewSysErr()
+    }
+    values := req.URL.Query()
+    thread_id, is_passed := values[`thread_id`]
+    if !is_passed {
+        res.Write([]byte(`Invalid params: No thread_id given!`))
+        return xerrors.NewUiErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`)
+    }
+
+    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    if err != nil {
+        return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+
+    rows, err := dbh.Query("select id, name from thread_posts where thread_id = $1;", thread_id[0])
+    if err != nil {
+        return xerrors.NewUiErr(err.Error(), err.Error())
+    }
+    defer rows.Close()
+
+    var curr_posts []thread_posts
+    for rows.Next() {
+        glog.Info("Popped new thread")
+        var curr_post thread_posts
+        err = rows.Scan(&curr_post.Id, &curr_post.Body)
+        if err != nil {
+            return xerrors.NewUiErr(err.Error(), err.Error())
+        }
+        curr_posts = append(curr_posts, curr_post)
+    }
+    bytes, err1 := json.Marshal(api_request{"ok", nil, &curr_posts})
+    if err1 != nil {
+        return xerrors.NewUiErr(err1.Error(), err1.Error())
+    }
+    res.Write(bytes)
+
     return nil
 }
 
