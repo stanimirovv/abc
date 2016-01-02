@@ -225,6 +225,13 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) error {
     if err != nil {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
+
+    bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
+    if err1 != nil {
+        return xerrors.NewUiErr(err1.Error(), err1.Error())
+    }
+    res.Write(bytes)
+
     return nil
 }
 // sample usage
