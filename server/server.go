@@ -147,7 +147,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
 
-    rows, err := dbh.Query("select id, name from thread_posts where thread_id = $1;", thread_id[0])
+    rows, err := dbh.Query("select id, body from thread_posts where thread_id = $1;", thread_id[0])
     if err != nil {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
@@ -183,6 +183,7 @@ func main() {
     commands := map[string]func(http.ResponseWriter, *http.Request) error{
 				"getBoards": getBoards,
 				"getActiveThreadsForBoard": getActiveThreadsForBoard,
+				"getPostsForThread": getPostsForThread,
 			       }
 
     http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
