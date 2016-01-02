@@ -122,7 +122,15 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error
         }
         active_threads = append(active_threads, thread)
     }
-    bytes, err1 := json.Marshal(api_request{"ok", nil, &active_threads})
+    var bytes []byte
+    var err1 error
+    if(len(active_threads) == 0){
+        errMsg := "No objects returned."
+        bytes, err1 = json.Marshal(api_request{"error", &errMsg, &active_threads})
+    }else {
+        bytes, err1 = json.Marshal(api_request{"ok", nil, &active_threads})
+    }
+
     if err1 != nil {
         return xerrors.NewUiErr(err1.Error(), err1.Error())
     }
@@ -163,7 +171,16 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
         }
         curr_posts = append(curr_posts, curr_post)
     }
-    bytes, err1 := json.Marshal(api_request{"ok", nil, &curr_posts})
+
+    var bytes []byte
+    var err1 error
+    if(len(curr_posts) == 0){
+	errMsg := "No objects returned."
+	bytes, err1 = json.Marshal(api_request{"error", &errMsg, &curr_posts})
+    }else {
+	bytes, err1 = json.Marshal(api_request{"ok", nil, &curr_posts})
+    }
+    
     if err1 != nil {
         return xerrors.NewUiErr(err1.Error(), err1.Error())
     }
