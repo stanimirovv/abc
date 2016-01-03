@@ -17,7 +17,7 @@ import (
 
 /*
 TODO:
-1) Add api_key, api_authentication
+1) Add api_authentication
 2) Add different input/output formats for the API
 3) Start adding settings to the boards, etc
 */
@@ -76,7 +76,10 @@ func getBoards(res http.ResponseWriter, req *http.Request)  error {
     if err != nil {
 	return xerrors.NewUiErr(err.Error(), err.Error())
     }
-    rows, err := dbh.Query("select id, name from boards;")
+
+    values := req.URL.Query()
+    api_key := values[`api_key`][0]
+    rows, err := dbh.Query("select b.id, b.name from boards b join image_board_clusters ibc on ibc.id = b.id where api_key = $1;", api_key)
     if err != nil {
 	return xerrors.NewUiErr(err.Error(), err.Error())
     }
@@ -115,7 +118,9 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error
     if err != nil {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
-    rows, err := dbh.Query("select id, name from threads where board_id = $1;", board_id[0])
+
+    api_key := values[`api_key`][0]
+    rows, err := dbh.Query("select t.id, t.name from threads t join boards b on b.id = t.board_id join image_board_clusters ibc on ibc.id = b.id where t.board_id = $1 and ibc.api_key = $2;", board_id[0], api_key)
     if err != nil {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
@@ -165,7 +170,8 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
 
-    rows, err := dbh.Query("select id, body from thread_posts where thread_id = $1;", thread_id[0])
+    api_key := values[`api_key`][0]
+    rows, err := dbh.Query("select tp.id, tp.body from thread_posts tp join threads t on t.id = tp.thread_id join boards b on b.id = t.board_id join image_board_clusters ibc on ibc.id = b.id where tp.thread_id = $1 and ibc.api_key = $2;", thread_id[0], api_key)
     if err != nil {
         return xerrors.NewUiErr(err.Error(), err.Error())
     }
@@ -173,7 +179,6 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
 
     var curr_posts []thread_posts
     for rows.Next() {
-        glog.Info("Popped new thread")
         var curr_post thread_posts
         err = rows.Scan(&curr_post.Id, &curr_post.Body)
         if err != nil {
@@ -264,13 +269,24 @@ func main() {
 					    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
 					    return
 					}
+
+
+					_, is_passed = values[`api_key`]
+					if !is_passed {
+					    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+					    return
+					}
+
 					_, is_passed = commands[command[0]]
 					if !is_passed{
 					    res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
 					    return
 					}
 
+
 					err := commands[command[0]](res, req)
+
+
 					if err != nil{
 					    glog.Error(err)
 					}
