@@ -4,6 +4,7 @@ CREATE TABLE image_board_clusters(id serial primary key,
                                   name text not null,
                                   descr text not null,
                                   long_descr text,
+                                  api_key text not null default,
                                   board_limit_count INT NOT NULL default 99999
                                   );
 
