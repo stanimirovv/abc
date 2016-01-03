@@ -59,6 +59,7 @@ type api_request struct{
     Payload interface{}
 }
 
+
 func getBoards(res http.ResponseWriter, req *http.Request)  error {
     if req == nil {
 	return xerrors.NewSysErr()
@@ -90,6 +91,7 @@ func getBoards(res http.ResponseWriter, req *http.Request)  error {
     res.Write(bytes)
     return nil
 }
+
 
 func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error {
     if req == nil {
@@ -138,6 +140,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  error
 
     return nil
 }
+
 
 func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
     if req == nil {
@@ -234,6 +237,8 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) error {
 
     return nil
 }
+
+
 // sample usage
 func main() {
     flag.Parse()
