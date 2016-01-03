@@ -180,7 +180,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  error {
     }else {
 	bytes, err1 = json.Marshal(api_request{"ok", nil, &curr_posts})
     }
-    
+
     if err1 != nil {
         return xerrors.NewUiErr(err1.Error(), err1.Error())
     }
@@ -197,13 +197,13 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) error {
     values := req.URL.Query()
     thread_id, is_passed := values[`thread_id`]
     if !is_passed {
-        res.Write([]byte(`Invalid params: No thread_id given!`))
+        res.Write([]byte(`{"Status":"error","Msg":"Invalid params: No thread_id given!","Payload":null}`))
         return xerrors.NewUiErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`)
     }
-    
+
     thread_body_post, is_passed := values[`thread_post_body`]
     if !is_passed {
-        res.Write([]byte(`Invalid params: No thread_id given!`))
+        res.Write([]byte(`{"Status":"error","Msg":"Invalid params: No thread_post_body given!","Payload":null}`))
         return xerrors.NewUiErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`)
     }
 
@@ -249,12 +249,12 @@ func main() {
 					values := req.URL.Query()
 					command, is_passed := values[`command`]
 					if !is_passed {
-					    res.Write([]byte(`Invalid params: No command name given!`))
+					    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
 					    return
 					}
 					_, is_passed = commands[command[0]]
 					if !is_passed{
-					    res.Write([]byte(`Invalid params: No such command!`))
+					    res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
 					    return
 					}
 
@@ -266,6 +266,5 @@ func main() {
 
     http.ListenAndServe(`:8089`, nil)
 }
-
 
 
