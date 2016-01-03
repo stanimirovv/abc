@@ -15,6 +15,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+/*
+TODO:
+1) Add api_key, api_authentication
+2) Add different input/output formats for the API
+3) Start adding settings to the boards, etc
+*/
+
 type image_board_clusters struct {
     Id int
     Descr string
