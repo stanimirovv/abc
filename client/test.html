@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html ng-app="abc">
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" media="screen" />
+  <script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div ng-controller="ExampleListCtrl" ng-init="name='Someone'">
+    <h1>{{ name }}</h1>
+    <ul>
+    <li ng-repeat="phone in phones">
+      <span>{{phone.name}}</span>
+      <p>{{phone.snippet}}</p>
+    </li>
+  </ul>
+  </div>
+</body>
+  <script>
+var phonecatApp = angular.module('abc', []);
+
+phonecatApp.controller('ExampleListCtrl', function($scope, $http) {
+  $scope.phones = [
+    {'name': 'Nexus S',
+     'snippet': 'Fast just got faster with Nexus S.'},
+    {'name': 'Motorola XOOM™ with Wi-Fi',
+     'snippet': 'The Next, Next Generation tablet.'},
+    {'name': 'MOTOROLA XOOM™',
+     'snippet': 'The Next, Next Generation tablet.'}
+  ];
+
+
+//todo see how to make get param strings http://stackoverflow.com/questions/111529/create-query-parameters-in-javascript
+$http({
+  method: 'GET',
+  url: 'http://www.w3schools.com/angular/customers.php'
+}).then(function successCallback(response) {
+    console.log("RESPONSE: ", response.data);
+  }, function errorCallback(response) {
+        console.log("ERROR: ", response);
+  });
+});
+
+  </script>
+</html>
