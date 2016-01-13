@@ -68,7 +68,7 @@ type api_request struct{
 
 
 func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil {
+    if req == nil || resp == nil {
 	return []byte{}, xerrors.NewSysErr()
     }
 
@@ -103,7 +103,7 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 
 
 func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil {
+    if req == nil || resp == nil {
         return []byte{}, xerrors.NewSysErr()
     }
     values := req.URL.Query()
@@ -152,7 +152,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
 
 
 func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil {
+    if req == nil || resp == nil {
         return []byte{}, xerrors.NewSysErr()
     }
     values := req.URL.Query()
@@ -201,7 +201,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
 
 
 func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
-    if req == nil {
+    if req == nil || resp == nil{
         return []byte{}, xerrors.NewSysErr()
     }
     values := req.URL.Query()
