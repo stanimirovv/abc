@@ -39,7 +39,8 @@ CREATE TABLE threads(   id serial primary key,
                         board_id INT REFERENCES boards,
                         max_posts_per_thread INT NOT NULL default 999999,
                         are_attachments_allowed BOOLEAN NOT NULL DEFAULT FALSE,
-                        limits_reached_action_id INT REFERENCES thread_limits_reached_actions
+                        limits_reached_action_id INT REFERENCES thread_limits_reached_actions,
+                        is_active boolean not null default true
                     );
 
 CREATE TABLE thread_posts(id serial primary key,
