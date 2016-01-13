@@ -86,7 +86,7 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 
     values := req.URL.Query()
     api_key := values[`api_key`][0]
-    rows, err := dbh.Query("select b.id, b.name from boards b join image_board_clusters ibc on ibc.id = b.id where api_key = $1;", api_key)
+    rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.id where api_key = $1;", api_key)
     if err != nil {
 	return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
     }
@@ -95,7 +95,7 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
     var curr_boards []boards
     for rows.Next() {
 	var board boards
-	err = rows.Scan(&board.Id, &board.Name)
+	err = rows.Scan(&board.Id, &board.Name, &board.Descr)
 	if err != nil {
 	    return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
 	}
