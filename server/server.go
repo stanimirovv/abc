@@ -5,6 +5,7 @@ import (
 	"github.com/golang/glog"
 	"flag"
 	"github.com/iambc/xerrors"
+	"reflect"
 
 	//API
 	"net/http"
@@ -280,11 +281,15 @@ func main() {
 
 
 					if err != nil{
-					    //Handle the errors properlly
+					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
+						res.Write([]byte(`{"Status":"error","Msg":"Application error!","Payload":null}`))
+					    }else if string(reflect.TypeOf(err).Name())  == `UiErr` {
+						    res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
+					    }
 					    glog.Error(err)
+					    return
 					}
-					
-					//TODO log  
+
 					glog.Info(string(bytes))
 					res.Write(bytes)
     })
