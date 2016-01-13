@@ -18,10 +18,12 @@ import (
 
 /*
 TODO:
-1) Add api_authentication
+ADD THREAD function
+1) DB connecting must not be hardcoded
 2) Add different input/output formats for the API
 3) Start adding settings to the boards, etc
 */
+
 
 type image_board_clusters struct {
     Id int
@@ -31,11 +33,15 @@ type image_board_clusters struct {
 }
 
 type boards struct {
-    Id int `json:"id"`
-    Name string `json:"name"`
+    Id int
+    Name string
     Descr string
-    ImageBoardCluster_id string
-    BoardLimitCount int
+    ImageBoardClusterId string
+    MaxThreadCount int //to be checked in insert thread
+    MaxActiveThreadCount int //to be checked  in insert thread
+    MaxPostsPerThread int // to be checked in insert thread
+    AreAttachmentsAllowed bool
+    LimitsReachedActionId int
 }
 
 type threads struct{
@@ -253,6 +259,7 @@ func main() {
 				"getActiveThreadsForBoard": getActiveThreadsForBoard,
 				"getPostsForThread": getPostsForThread,
 				"addPostToThread": addPostToThread,
+				//TODO add thread 
 			       }
 
     http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
