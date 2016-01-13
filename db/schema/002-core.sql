@@ -23,6 +23,7 @@ CREATE TABLE boards(id serial primary key,
                     descr text,
                     image_board_cluster_id INT REFERENCES image_board_clusters,
                     thread_setting_max_thread_count INT NOT NULL default -1,
+                    thread_setting_max_active_thread_count int not null default -1,
                     thread_setting_max_posts_per_thread INT NOT NULL default 999999,
                     thread_setting_are_attachments_allowed BOOLEAN NOT NULL DEFAULT FALSE,
                     thread_setting_limits_reached_action_id INT REFERENCES thread_limits_reached_actions
