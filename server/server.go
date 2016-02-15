@@ -40,8 +40,8 @@ type boards struct {
     MaxThreadCount int //to be checked in insert thread
     MaxActiveThreadCount int //to be checked  in insert thread
     MaxPostsPerThread int // to be checked in insert thread
-    AreAttachmentsAllowed bool
-    LimitsReachedActionId int
+    AreAttachmentsAllowed bool // to be checked in insert post
+    PostLimitsReachedActionId int // to be checked in insert post
 }
 
 type threads struct{
@@ -298,7 +298,7 @@ func main() {
 					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
 						res.Write([]byte(`{"Status":"error","Msg":"Application error!","Payload":null}`))
 					    }else if string(reflect.TypeOf(err).Name())  == `UiErr` {
-						    res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
+						res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
 					    }
 					    glog.Error(err)
 					    return
