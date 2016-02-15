@@ -18,7 +18,6 @@ import (
 
 /*
 TODO:
-ADD THREAD function
 1) DB connecting must not be hardcoded
 2) Add different input/output formats for the API
 3) Add settings to the boards
@@ -83,14 +82,14 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
     if err != nil {
-	return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     values := req.URL.Query()
     api_key := values[`api_key`][0]
     rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.id where api_key = $1;", api_key)
     if err != nil {
-	return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
     }
     defer rows.Close()
 
@@ -99,13 +98,13 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 	var board boards
 	err = rows.Scan(&board.Id, &board.Name, &board.Descr)
 	if err != nil {
-	    return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+	    return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `003`, true)
 	}
 	curr_boards = append(curr_boards, board)
     }
     bytes, err1 := json.Marshal(api_request{"ok", nil, &curr_boards})
     if err1 != nil {
-	return []byte{}, xerrors.NewUiErr(err1.Error(), err1.Error())
+	return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `004`, true)
     }
     return bytes, nil
 }
@@ -118,21 +117,21 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     values := req.URL.Query()
     board_id, is_passed := values[`board_id`]
     if !is_passed {
-	return []byte{}, xerrors.NewUiErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`)
+	return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `005`, true)
     }
 
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     api_key := values[`api_key`][0]
-    rows, err := dbh.Query("select t.id, t.name from threads t 
+    rows, err := dbh.Query(`select t.id, t.name from threads t 
 				join boards b on b.id = t.board_id 
 				join image_board_clusters ibc on ibc.id = b.id 
-			    where t.is_active = TRUE and t.board_id = $1 and bc.api_key = $2;", board_id[0], api_key)
+			    where t.is_active = TRUE and t.board_id = $1 and bc.api_key = $2;`, board_id[0], api_key)
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
     defer rows.Close()
 
@@ -142,7 +141,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
         var thread threads
         err = rows.Scan(&thread.Id, &thread.Name)
         if err != nil {
-            return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+            return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
         }
         active_threads = append(active_threads, thread)
     }
@@ -156,7 +155,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     }
 
     if err1 != nil {
-        return []byte{}, xerrors.NewUiErr(err1.Error(), err1.Error())
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
     }
 
     return bytes, nil
@@ -170,22 +169,22 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
     values := req.URL.Query()
     thread_id, is_passed := values[`thread_id`]
     if !is_passed {
-        return []byte{},xerrors.NewUiErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`)
+        return []byte{},xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `006`, true)
     }
 
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     api_key := values[`api_key`][0]
-    rows, err := dbh.Query("select tp.id, tp.body 
+    rows, err := dbh.Query(`select tp.id, tp.body 
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
 						 join image_board_clusters ibc on ibc.id = b.id 
-			    where tp.thread_id = $1 and ibc.api_key = $2;", thread_id[0], api_key)
+			    where tp.thread_id = $1 and ibc.api_key = $2;`, thread_id[0], api_key)
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewSysErr()
     }
     defer rows.Close()
 
@@ -194,7 +193,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
         var curr_post thread_posts
         err = rows.Scan(&curr_post.Id, &curr_post.Body)
         if err != nil {
-            return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+            return []byte{}, xerrors.NewSysErr()
         }
         curr_posts = append(curr_posts, curr_post)
     }
@@ -209,7 +208,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
     }
 
     if err1 != nil {
-        return []byte{}, xerrors.NewUiErr(err1.Error(), err1.Error())
+        return []byte{}, xerrors.NewSysErr()
     }
 
     return bytes, nil
@@ -223,12 +222,12 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     values := req.URL.Query()
     thread_id, is_passed := values[`thread_id`]
     if !is_passed {
-        return []byte{}, xerrors.NewUiErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`)
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `001`, true)
     }
 
     thread_body_post, is_passed := values[`thread_post_body`]
     if !is_passed {
-        return []byte{}, xerrors.NewUiErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`)
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`, `001`, true)
     }
 
     attachment_urls, is_passed := values[`attachment_url`]
@@ -241,18 +240,18 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 
     dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
 
     if err != nil {
-        return []byte{}, xerrors.NewUiErr(err.Error(), err.Error())
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
     if err1 != nil {
-        return []byte{}, xerrors.NewUiErr(err1.Error(), err1.Error())
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
     }
 
     return bytes, nil
@@ -298,7 +297,7 @@ func main() {
 
 					if err != nil{
 					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
-						res.Write([]byte(`{"Status":"error","Msg":"Application error!","Payload":null}`))
+						res.Write([]byte(`{"Status":"error","Msg":"` + err.Error()  +`","Payload":null}`))
 					    }else if string(reflect.TypeOf(err).Name())  == `UiErr` {
 						res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
 					    }
