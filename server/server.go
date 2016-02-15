@@ -6,6 +6,7 @@ import (
 	"flag"
 	"github.com/iambc/xerrors"
 	"reflect"
+	"os"
 
 	//API
 	"net/http"
@@ -23,6 +24,7 @@ TODO:
 3) Add settings to the boards
 4) Add settings to the threads
 5) Improve the error handling
+6) port must be a setting
 */
 
 
@@ -80,7 +82,7 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 	return []byte{}, xerrors.NewSysErr()
     }
 
-    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    dbh, err := sql.Open("postgres", dbConnString)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -120,7 +122,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
 	return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `005`, true)
     }
 
-    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    dbh, err := sql.Open("postgres", dbConnString)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -172,7 +174,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
         return []byte{},xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `006`, true)
     }
 
-    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    dbh, err := sql.Open("postgres", dbConnString)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -238,7 +240,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 	attachment_url = &attachment_urls[0]
     }
 
-    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    dbh, err := sql.Open("postgres", dbConnString)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -264,7 +266,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     }
     values := req.URL.Query()
 
-    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    dbh, err := sql.Open("postgres", dbConnString)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -292,6 +294,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     return bytes, nil
 }
 
+var dbConnString = ``
 
 // sample usage
 func main() {
@@ -323,6 +326,7 @@ func main() {
 					_, is_passed = commands[command[0]]
 					if !is_passed{
 					    res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
+					    glog.Error("command: ", command[0])
 					    return
 					}
 
@@ -344,7 +348,8 @@ func main() {
 					res.Write(bytes)
     })
 
-    http.ListenAndServe(`:8089`, nil)
+    dbConnString = os.Getenv("ABC_DB_CONN_STRING") // DB will return error if empty string
+    http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
 }
 
 
