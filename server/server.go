@@ -21,7 +21,9 @@ TODO:
 ADD THREAD function
 1) DB connecting must not be hardcoded
 2) Add different input/output formats for the API
-3) Start adding settings to the boards, etc
+3) Add settings to the boards
+4) Add settings to the threads
+5) Improve the error handling
 */
 
 
