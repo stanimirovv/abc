@@ -258,6 +258,41 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 }
 
 
+func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
+    if req == nil || res == nil{
+        return []byte{}, xerrors.NewSysErr()
+    }
+    values := req.URL.Query()
+
+    dbh, err := sql.Open("postgres", "user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable")
+    if err != nil {
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+    }
+
+    thread_name, is_passed := values[`thread_name`]
+    if !is_passed {
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_name given!`, `Invalid params: No thread_name given!`, `001`, true)
+    }
+
+    board_id, is_passed := values[`board_id`]
+    if !is_passed {
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `001`, true)
+    }
+    _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id) VALUES($1, $2, 1)", thread_name[0], board_id[0])
+
+    if err != nil {
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+    }
+
+    bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
+    if err1 != nil {
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
+    }
+
+    return bytes, nil
+}
+
+
 // sample usage
 func main() {
     flag.Parse()
@@ -267,7 +302,7 @@ func main() {
 				"getActiveThreadsForBoard": getActiveThreadsForBoard,
 				"getPostsForThread": getPostsForThread,
 				"addPostToThread": addPostToThread,
-				//TODO add thread 
+				"addThread": addThread,
 			       }
 
     http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
