@@ -19,12 +19,11 @@ import (
 
 /*
 TODO:
-1) DB connecting must not be hardcoded
 2) Add different input/output formats for the API
 3) Add settings to the boards
 4) Add settings to the threads
 5) Improve the error handling
-6) port must be a setting
+6) quote of the day
 */
 
 
@@ -245,6 +244,16 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
+    var is_limit_reached
+    err = dbh.QueryRow("select count(*) +1 >= max(T.max_posts_per_thread) from thread_posts TP JOIN threads T ON T.id = TP.thread_id where thread_id = ?", thread_id).Scan(&is_limit_reached)
+    if err != nil {
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+    }
+
+    if is_limit_reached {
+	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `002`, true)
+    }
+
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
 
     if err != nil {
@@ -280,6 +289,18 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     if !is_passed {
         return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `001`, true)
     }
+
+
+    var is_limit_reached
+    err = dbh.QueryRow("select count(*) +1 >= max(B.thread_setting_max_thread_count) from threads T JOIN boards B ON B.id = T.board_id where board_id = ?", board_id).Scan(&is_limit_reached)
+    if err != nil {
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+    }
+
+    if is_limit_reached {
+	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `002`, true)
+    }
+
     _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id) VALUES($1, $2, 1)", thread_name[0], board_id[0])
 
     if err != nil {
