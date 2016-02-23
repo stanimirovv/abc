@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Single Page App Example</title>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script>
+    if (! "onhashchange" in window) {
+        alert("Please upgrade your browser!");
+    }
+
+    function locationHashChanged() {
+        if (location.hash === "#page1") {
+            document.getElementById("app").innerHTML = "Page 1 contents!";
+        }
+        else if (location.hash === "#page2"){
+            document.getElementById("app").innerHTML = "Page 2 contents!";
+        }
+        else{
+            document.getElementById("app").innerHTML = "404 page not found lalalala";
+        }
+    }
+
+    window.onload = function (event) {
+        window.location.hash = "#page1";
+    };
+
+    window.onhashchange = locationHashChanged;
+  </script>
+</html>
