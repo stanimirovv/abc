@@ -244,7 +244,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
-    var is_limit_reached
+    var is_limit_reached bool
     err = dbh.QueryRow("select count(*) +1 >= max(T.max_posts_per_thread) from thread_posts TP JOIN threads T ON T.id = TP.thread_id where thread_id = ?", thread_id).Scan(&is_limit_reached)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
@@ -291,7 +291,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     }
 
 
-    var is_limit_reached
+    var is_limit_reached bool
     err = dbh.QueryRow("select count(*) +1 >= max(B.thread_setting_max_thread_count) from threads T JOIN boards B ON B.id = T.board_id where board_id = ?", board_id).Scan(&is_limit_reached)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
