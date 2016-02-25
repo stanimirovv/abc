@@ -130,7 +130,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     rows, err := dbh.Query(`select t.id, t.name from threads t 
 				join boards b on b.id = t.board_id 
 				join image_board_clusters ibc on ibc.id = b.id 
-			    where t.is_active = TRUE and t.board_id = $1 and bc.api_key = $2;`, board_id[0], api_key)
+			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2;`, board_id[0], api_key)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -351,7 +351,7 @@ func main() {
 					    return
 					}
 
-
+					res.Header().Set("Access-Control-Allow-Origin", "*")
 					bytes, err := commands[command[0]](res, req)
 
 
