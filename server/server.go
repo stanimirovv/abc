@@ -245,7 +245,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     }
 
     var is_limit_reached bool
-    err = dbh.QueryRow("select count(*) +1 >= max(T.max_posts_per_thread) from thread_posts TP JOIN threads T ON T.id = TP.thread_id where thread_id = ?", thread_id).Scan(&is_limit_reached)
+    err = dbh.QueryRow("select count(*) +1 >= max(T.max_posts_per_thread) from thread_posts TP JOIN threads T ON T.id = TP.thread_id where thread_id = $1;", thread_id[0]).Scan(&is_limit_reached)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -257,7 +257,8 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
 
     if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+	glog.Error("!!!!!!!!!!!!!!!!")
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
     }
 
     bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
@@ -358,8 +359,10 @@ func main() {
 					if err != nil{
 					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
 						res.Write([]byte(`{"Status":"error","Msg":"` + err.Error()  +`","Payload":null}`))
-					    }else if string(reflect.TypeOf(err).Name())  == `UiErr` {
+					    } else if string(reflect.TypeOf(err).Name())  == `UIErr` {
 						res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
+					    } else {
+						res.Write([]byte(`{"Status":"error","Msg":"Application Error!","Payload":null}`))
 					    }
 					    glog.Error(err)
 					    return
