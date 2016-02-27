@@ -3,6 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>Single Page App Example</title>
+    <style>
+        .postBox{
+            border-style: solid;
+            border-width: 1px;
+         }
+    </style>
   </head>
   <body>
     <div id="app"></div>
@@ -13,21 +19,87 @@
     }
 
     function locationHashChanged() {
-        if (location.hash === "#page1") {
-            document.getElementById("app").innerHTML = "Page 1 contents!";
+        if (location.hash === "#threads") {
+            getBoards();
         }
-        else if (location.hash === "#page2"){
-            document.getElementById("app").innerHTML = "Page 2 contents!";
+        else if (location.hash.indexOf("#thread:") > -1 ){
+            getPostsForThread(location.hash.split(":")[1]);
         }
         else{
-            document.getElementById("app").innerHTML = "404 page not found lalalala";
+            document.getElementById("app").innerHTML = "404 page not found";
         }
     }
 
     window.onload = function (event) {
-        window.location.hash = "#page1";
+        window.location.hash = "#threads";
     };
 
     window.onhashchange = locationHashChanged;
+
+    function getBoards() {
+        var xmlhttp = new XMLHttpRequest();
+
+        xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b");
+        xmlhttp.send();
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var resp = JSON.parse(xmlhttp.responseText);
+                console.log(resp.Payload);
+                
+                var threadHtml = '';
+                for (var i = 0; i < resp.Payload.length; i++){
+                    console.log(resp.Payload[i]);    
+                    xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + resp.Payload[i].Id);
+                    xmlhttp.send();
+                    xmlhttp.onreadystatechange = function() {
+                        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                            var respThreads = JSON.parse(xmlhttp.responseText);
+                            console.log(resp.Payload);
+                            for (var k = 0; k <  respThreads.Payload.length; k++){
+                                console.log(respThreads.Payload[k].Name);
+                                threadHtml += '<a href="#thread:'+respThreads.Payload[k].Id + '">' +respThreads.Payload[k].Name +' </a></br>';
+                            }
+                        }
+                        document.getElementById("app").innerHTML = threadHtml; 
+                    } 
+                }
+            }
+        }
+    }
+
+    function getPostsForThread(threadId){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getPostsForThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId);
+        xmlhttp.send();
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var respPosts = JSON.parse(xmlhttp.responseText);
+                    console.log(respPosts.Payload);
+                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><input type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    for (var k = 0; k <  respPosts.Payload.length; k++){
+                        console.log (respPosts.Payload[k]);
+                        threadHtml += '<p class="postBox">'+ respPosts.Payload[k].Body +'</p>';
+                    }
+                        document.getElementById("app").innerHTML = threadHtml; 
+            }
+                
+        }
+    }
+
+    function submitNewPost(){
+        var xmlhttp = new XMLHttpRequest();
+        var threadId = location.hash.split(":")[1]; 
+        xmlhttp.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId + 
+                            "&thread_post_body=" + escape(document.getElementById('newPostTextArea').value));
+        xmlhttp.send();
+
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    var respPosts = JSON.parse(xmlhttp.responseText);
+            }
+       } 
+    }
   </script>
 </html>
