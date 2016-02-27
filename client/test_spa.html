@@ -3,11 +3,9 @@
   <head>
     <meta charset="utf-8">
     <title>Single Page App Example</title>
+    <link rel="stylesheet" type="text/css" href="css/pure/pure-min.css">
+
     <style>
-        .postBox{
-            border-style: solid;
-            border-width: 1px;
-         }
     </style>
   </head>
   <body>
@@ -77,7 +75,7 @@
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
                     console.log(respPosts.Payload);
-                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><input type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><input class="pure-button" type="button" onclick="submitNewPost()" value="Submit post!"  />';
                     for (var k = 0; k <  respPosts.Payload.length; k++){
                         console.log (respPosts.Payload[k]);
                         threadHtml += '<p class="postBox">'+ respPosts.Payload[k].Body +'</p>';
@@ -98,6 +96,7 @@
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
+                    getPostsForThread(threadId)
             }
        } 
     }
