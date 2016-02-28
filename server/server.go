@@ -50,7 +50,7 @@ type threads struct{
     Id int
     Name string
     Descr string
-    Board_id int
+    BoardId int
     MaxPostsPerThread int
     AreAttachmentsAllowed bool
     LimitsReachedActionId int
@@ -292,11 +292,10 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
 
 
     var is_limit_reached bool
-    err = dbh.QueryRow("select count(*) +1 >= max(B.thread_setting_max_thread_count) from threads T JOIN boards B ON B.id = T.board_id where board_id = ?", board_id).Scan(&is_limit_reached)
+    err = dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", board_id[0]).Scan(&is_limit_reached)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
-
     if is_limit_reached {
 	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `002`, true)
     }
