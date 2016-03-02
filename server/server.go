@@ -122,7 +122,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
 				join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
 			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2;`, board_id[0], api_key)
     if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
     }
     defer rows.Close()
 
@@ -132,7 +132,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
         var thread threads
         err = rows.Scan(&thread.Id, &thread.Name)
         if err != nil {
-            return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+            return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `007`, true)
         }
         active_threads = append(active_threads, thread)
     }
@@ -146,7 +146,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     }
 
     if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `008`, true)
     }
 
     return bytes, nil
@@ -229,23 +229,23 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     var is_limit_reached bool
     err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
     if err != nil {
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
     }
 
     if is_limit_reached {
-	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `002`, true)
+	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
 
     if err != nil {
 	glog.Error(err)
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `011`, true)
     }
 
     bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
     if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `012`, true)
     }
 
     return bytes, nil
@@ -260,12 +260,12 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
 
     thread_name, is_passed := values[`thread_name`]
     if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_name given!`, `Invalid params: No thread_name given!`, `001`, true)
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_name given!`, `Invalid params: No thread_name given!`, `013`, true)
     }
 
     board_id, is_passed := values[`board_id`]
     if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `001`, true)
+        return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `014`, true)
     }
 
 
@@ -273,22 +273,22 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", board_id[0]).Scan(&is_limit_reached)
     if err != nil {
 	glog.Error("COULD NOT SELECT thread_count")
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `015`, true)
     }
     if is_limit_reached {
-	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `002`, true)
+	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `016`, true)
     }
 
     _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id) VALUES($1, $2, 1)", thread_name[0], board_id[0])
 
     if err != nil {
 	glog.Error("INSERT FAILED")
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `017`, true)
     }
 
     bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
     if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `001`, true)
+        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `018`, true)
     }
 
     return bytes, nil
