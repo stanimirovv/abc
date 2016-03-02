@@ -81,11 +81,6 @@ func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
 	return []byte{}, xerrors.NewSysErr()
     }
 
-    dbh, err := sql.Open("postgres", dbConnString)
-    if err != nil {
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
-    }
-
     values := req.URL.Query()
     api_key := values[`api_key`][0]
     rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", api_key)
@@ -119,11 +114,6 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     board_id, is_passed := values[`board_id`]
     if !is_passed {
 	return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `005`, true)
-    }
-
-    dbh, err := sql.Open("postgres", dbConnString)
-    if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
     api_key := values[`api_key`][0]
@@ -173,24 +163,21 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
         return []byte{},xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `006`, true)
     }
 
-    dbh, err := sql.Open("postgres", dbConnString)
-    if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
-    }
-
     api_key := values[`api_key`][0]
     rows, err := dbh.Query(`select tp.id, tp.body 
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
-						 join image_board_clusters ibc on ibc.id = b.id 
+						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
 			    where tp.thread_id = $1 and ibc.api_key = $2;`, thread_id[0], api_key)
     if err != nil {
+	glog.Error(err)
         return []byte{}, xerrors.NewSysErr()
     }
     defer rows.Close()
 
     var curr_posts []thread_posts
     for rows.Next() {
+	glog.Info("new post for thread with id: ", thread_id[0])
         var curr_post thread_posts
         err = rows.Scan(&curr_post.Id, &curr_post.Body)
         if err != nil {
@@ -239,13 +226,8 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 	attachment_url = &attachment_urls[0]
     }
 
-    dbh, err := sql.Open("postgres", dbConnString)
-    if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
-    }
-
     var is_limit_reached bool
-    err = dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
+    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
@@ -257,6 +239,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
 
     if err != nil {
+	glog.Error(err)
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
     }
 
@@ -275,11 +258,6 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     }
     values := req.URL.Query()
 
-    dbh, err := sql.Open("postgres", dbConnString)
-    if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
-    }
-
     thread_name, is_passed := values[`thread_name`]
     if !is_passed {
         return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_name given!`, `Invalid params: No thread_name given!`, `001`, true)
@@ -292,8 +270,9 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
 
 
     var is_limit_reached bool
-    err = dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", board_id[0]).Scan(&is_limit_reached)
+    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", board_id[0]).Scan(&is_limit_reached)
     if err != nil {
+	glog.Error("COULD NOT SELECT thread_count")
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
     if is_limit_reached {
@@ -303,6 +282,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id) VALUES($1, $2, 1)", thread_name[0], board_id[0])
 
     if err != nil {
+	glog.Error("INSERT FAILED")
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `001`, true)
     }
 
@@ -315,11 +295,19 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
 }
 
 var dbConnString = ``
+var dbh *sql.DB
 
 // sample usage
 func main() {
     flag.Parse()
 
+    var err error
+    dbConnString = os.Getenv("ABC_DB_CONN_STRING") // DB will return error if empty string
+    dbh, err = sql.Open("postgres", dbConnString)
+    if err != nil {
+	glog.Fatal(err)
+    }
+   
     commands := map[string]func(http.ResponseWriter, *http.Request) ([]byte, error){
 				"getBoards": getBoards,
 				"getActiveThreadsForBoard": getActiveThreadsForBoard,
@@ -370,7 +358,6 @@ func main() {
 					res.Write(bytes)
     })
 
-    dbConnString = os.Getenv("ABC_DB_CONN_STRING") // DB will return error if empty string
     http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
 }
 
