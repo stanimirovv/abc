@@ -22,7 +22,6 @@ TODO:
 2) Add different input/output formats for the API
 3) Add settings to the boards
 4) Add settings to the threads
-5) Improve the error handling
 6) quote of the day
 */
 
@@ -233,6 +232,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     }
 
     if is_limit_reached {
+	dbh.QueryRow("UPDATE threads set is_active = false where id = $1",  thread_id[0]).Scan()
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
