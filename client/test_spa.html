@@ -117,7 +117,7 @@
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
                     console.log(respPosts.Payload);
-                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><input class="btn btn-default" type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-default" type="button" onclick="submitNewPost()" value="Submit post!"  />';
                     if( respPosts.Payload !== null){ //undef means there are no posts to this thread
                         for (var k = 0; k <  respPosts.Payload.length; k++){
                             console.log (respPosts.Payload[k]);
@@ -133,8 +133,10 @@
     function submitNewPost(){
         var xmlhttp = new XMLHttpRequest();
         var threadId = location.hash.split(":")[1]; 
+        attachmentUrl = document.getElementById('newPostAttachUrlInp').value;
+
         xmlhttp.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId + 
-                            "&thread_post_body=" + escape(document.getElementById('newPostTextArea').value));
+                            "&thread_post_body=" + escape(document.getElementById('newPostTextArea').value) + "&attachment_url="+escape(attachmentUrl));
         xmlhttp.send();
 
         xmlhttp.onreadystatechange = function() {
