@@ -11,8 +11,8 @@
     <style>
     .postBox{
         min-height:30px;
-        background:gray;
-        border:1px;black;
+        /*background:gray;*/
+        border-style: solid;black;3px;
         padding:0;
         margin-top: 1px;
         margin-bottom: 1px;
@@ -117,7 +117,7 @@
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
                     console.log(respPosts.Payload);
-                    var threadHtml = '<textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-default" type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    var threadHtml = '<p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPost()" value="Submit post!"  />';
                     if( respPosts.Payload !== null){ //undef means there are no posts to this thread
                         for (var k = 0; k <  respPosts.Payload.length; k++){
                             console.log (respPosts.Payload[k]);
@@ -158,7 +158,7 @@
 
     function showThreadsForBoard(){
         var boardId = location.hash.split(":")[1]; 
-        document.getElementById("app").innerHTML = '<h1>'+ boards[boardId].Name +'</h1><h2>Threads:</h2><a href="#new_thread:'+ boardId  +'" class="btn btn-primary">New Thread!</a>';
+        document.getElementById("app").innerHTML = '<h1>'+ boards[boardId].Name +'</h1><h2>Threads:</h2> <br><a href="#new_thread:'+ boardId  +'" class="btn btn-primary">New Thread!</a><br/><br/>';
         var xmlhttp1 = new XMLHttpRequest();
         xmlhttp1.open("GET", "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId);
         xmlhttp1.send();
@@ -177,7 +177,7 @@
     }
 
     function loadNewThreadTemplate(){
-        document.getElementById("app").innerHTML = '<textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><input class="pure-button" type="button" onclick="submitNewThread()" value="Submit Thread!"  />';
+        document.getElementById("app").innerHTML = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><input class="btn btn-primary" type="button" onclick="submitNewThread()" value="Submit Thread!"  />';
 
     }
 
