@@ -121,7 +121,16 @@
                     if( respPosts.Payload !== null){ //undef means there are no posts to this thread
                         for (var k = 0; k <  respPosts.Payload.length; k++){
                             console.log (respPosts.Payload[k]);
-                            threadHtml += '<p class="postBox">'+ respPosts.Payload[k].Body +'</p>';
+
+                            var attachmentUrlHtml = '';
+                            if(respPosts.Payload[k].AttachmentUrl !== undefined && 
+                               respPosts.Payload[k].AttachmentUrl !== '' && 
+                               respPosts.Payload[k].AttachmentUrl !== 'null' && 
+                               respPosts.Payload[k].AttachmentUrl !== null ){
+                                attachmentUrlHtml = '</br><a href="' + respPosts.Payload[k].AttachmentUrl  + '">attachment</a>';
+                            }
+
+                            threadHtml += '<p class="postBox">'+ respPosts.Payload[k].Body + attachmentUrlHtml +'</p>';
                         }
                     }
                     document.getElementById("app").innerHTML = threadHtml; 
