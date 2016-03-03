@@ -54,7 +54,7 @@
     }
 
     function locationHashChanged() {
-        if (location.hash === "#threads") {
+        if (location.hash === "#boards") {
             getBoards();
         }
         else if (location.hash.indexOf("#thread:") > -1 ){
@@ -69,7 +69,7 @@
     }
 
     window.onload = function (event) {
-        window.location.hash = "#threads";
+        window.location.hash = "#boards";
     };
 
     window.onhashchange = locationHashChanged;
@@ -87,14 +87,14 @@
                 console.log(resp.Payload);
                 
                 threadHtml = '';
-                document.getElementById("app").innerHTML = ''; 
+                document.getElementById("app").innerHTML = '<h1>Boards:</h1>'; 
                 if( resp.Payload === null){
                     document.getElementById("app").innerHTML += '<p>No threads for this board</p>';
                     return;
                 }
                 for (var i = 0; i < resp.Payload.length; i++){
                     (function (i){
-                        console.log(resp.Payload[i].Name);    
+                      /*  console.log(resp.Payload[i].Name);    
                         var xmlhttp1 = new XMLHttpRequest();
                         xmlhttp1.open("GET", "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + resp.Payload[i].Id);
                         xmlhttp1.send();
@@ -111,7 +111,8 @@
                                     document.getElementById("app").innerHTML += '<a href="#thread:'+respThreads.Payload[k].Id + '" class="thread" >' +respThreads.Payload[k].Name +' </a></br>';
                                 }
                             }
-                        } 
+                        }*/
+                        document.getElementById("app").innerHTML += '<a href="#board:'+resp.Payload[i].Id + '" class="board">' + resp.Payload[i].Name + '</a>';
                     })(i)
                 }
             }
