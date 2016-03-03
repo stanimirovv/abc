@@ -20,8 +20,6 @@ import (
 /*
 TODO:
 2) Add different input/output formats for the API
-3) Add settings to the boards
-4) Add settings to the threads
 6) quote of the day
 */
 
@@ -167,7 +165,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
 						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
-			    where tp.thread_id = $1 and ibc.api_key = $2;`, thread_id[0], api_key)
+			    where tp.thread_id = $1 and ibc.api_key = $2 and t.is_active = true;`, thread_id[0], api_key)
     if err != nil {
 	glog.Error(err)
         return []byte{}, xerrors.NewSysErr()
@@ -279,7 +277,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
 	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `016`, true)
     }
 
-    _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id) VALUES($1, $2, 1)", thread_name[0], board_id[0])
+    _, err = dbh.Query("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)", thread_name[0], board_id[0])
 
     if err != nil {
 	glog.Error("INSERT FAILED")
