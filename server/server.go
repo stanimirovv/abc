@@ -216,15 +216,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     if !is_passed {
         return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`, `001`, true)
     }
-
-    attachment_urls, is_passed := values[`attachment_url`]
-    var attachment_url *string
-    if !is_passed{
-	attachment_url = nil
-    }else{
-	attachment_url = &attachment_urls[0]
-    }
-
+ 
     var is_limit_reached bool
     err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
     if err != nil {
@@ -234,6 +226,14 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     if is_limit_reached {
 	dbh.QueryRow("UPDATE threads set is_active = false where id = $1",  thread_id[0]).Scan()
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
+    }
+
+    attachment_urls, is_passed := values[`attachment_url`]
+    var attachment_url *string
+    if !is_passed{
+	attachment_url = nil
+    }else{
+	attachment_url = &attachment_urls[0]
     }
 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
@@ -307,7 +307,7 @@ func main() {
     if err != nil {
 	glog.Fatal(err)
     }
-   
+
     commands := map[string]func(http.ResponseWriter, *http.Request) ([]byte, error){
 				"getBoards": getBoards,
 				"getActiveThreadsForBoard": getActiveThreadsForBoard,
