@@ -343,11 +343,11 @@ func main() {
 
 					if err != nil{
 					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
-						res.Write([]byte(`{"Status":"error","Msg":"` + err.Error()  +`","Payload":null}`))
+						res.Write([]byte(`{"Status":"`+ xerrors.SysErrCode +`","Msg":"` + err.Error()  +`","Payload":null}`))
 					    } else if string(reflect.TypeOf(err).Name())  == `UIErr` {
-						res.Write([]byte(`{"Status":"error","Msg":"`+ err.Error() +`","Payload":null}`))
+						res.Write([]byte(`{"Status":"` + err.(xerrors.UIErr).Code + `","Msg":"`+ err.Error() +`","Payload":null}`))
 					    } else {
-						res.Write([]byte(`{"Status":"error","Msg":"Application Error!","Payload":null}`))
+						res.Write([]byte(`{"Status":"000","Msg":"Application Error!","Payload":null}`))
 					    }
 					    glog.Error(err)
 					    return
@@ -356,6 +356,8 @@ func main() {
 					glog.Info(string(bytes))
 					res.Write(bytes)
     })
+
+    http.Handle("/f/", http.StripPrefix("/f/", http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR")))))
 
     http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
 }
