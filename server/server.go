@@ -343,9 +343,9 @@ func main() {
 
 					if err != nil{
 					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
-						res.Write([]byte(`{"Status":"`+ xerrors.SysErrCode +`","Msg":"` + err.Error()  +`","Payload":null}`))
+						res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))
 					    } else if string(reflect.TypeOf(err).Name())  == `UIErr` {
-						res.Write([]byte(`{"Status":"` + err.(xerrors.UIErr).Code + `","Msg":"`+ err.Error() +`","Payload":null}`))
+						res.Write([]byte(`{"Status":"` + err.(xerrors.XError).Code + `","Msg":"`+ err.Error() +`","Payload":null}`))
 					    } else {
 						res.Write([]byte(`{"Status":"000","Msg":"Application Error!","Payload":null}`))
 					    }
