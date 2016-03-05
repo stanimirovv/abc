@@ -58,6 +58,8 @@ type thread_posts struct{
     Body string
     ThreadId int
     AttachmentUrl *string
+    InsertedAt *string
+    SourceIp *string
 }
 
 type thread_limits_reached_actions struct{
@@ -215,7 +217,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     if !is_passed {
         return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`, `001`, true)
     }
- 
+
     var is_limit_reached bool
     err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
     if err != nil {
@@ -235,7 +237,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 	attachment_url = &attachment_urls[0]
     }
 
-    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url) VALUES($1, $2, $3)", thread_body_post[0], thread_id[0], attachment_url)
+    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", thread_body_post[0], thread_id[0], attachment_url, req.RemoteAddr)
 
     if err != nil {
 	glog.Error(err)
