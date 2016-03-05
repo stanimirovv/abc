@@ -7,6 +7,7 @@ import (
 	"github.com/iambc/xerrors"
 	"reflect"
 	"os"
+	"time"
 
 	//API
 	"net/http"
@@ -58,7 +59,7 @@ type thread_posts struct{
     Body string
     ThreadId int
     AttachmentUrl *string
-    InsertedAt *string
+    InsertedAt time.Time
     SourceIp *string
 }
 
@@ -163,7 +164,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
     }
 
     api_key := values[`api_key`][0]
-    rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url 
+    rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip 
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
 						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
@@ -178,7 +179,7 @@ func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, err
     for rows.Next() {
 	glog.Info("new post for thread with id: ", thread_id[0])
         var curr_post thread_posts
-        err = rows.Scan(&curr_post.Id, &curr_post.Body, &curr_post.AttachmentUrl)
+        err = rows.Scan(&curr_post.Id, &curr_post.Body, &curr_post.AttachmentUrl, &curr_post.InsertedAt, &curr_post.SourceIp)
         if err != nil {
 	    glog.Error(err)
             return []byte{}, xerrors.NewSysErr()
