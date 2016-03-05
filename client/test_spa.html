@@ -34,7 +34,7 @@
 
     .thread{
         text-decoration: none !important; 
-        display: block;
+        /*display: block;*/
         font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
         font-size: 14px;
     }
@@ -170,7 +170,8 @@
                     return;
                 }
                 for (var k = 0; k <  respThreads.Payload.length; k++){
-                    document.getElementById("app").innerHTML += '<a href="#thread:'+respThreads.Payload[k].Id + '" class="thread" >' +respThreads.Payload[k].Name +' </a></br>';
+                    document.getElementById("app").innerHTML += '<a href="#thread:'+respThreads.Payload[k].Id + '" class="thread" >' +respThreads.Payload[k].Name +' </a> (Posts:' 
+                                                                + respThreads.Payload[k].PostCount  + ' Attachments: '+ respThreads.Payload[k].PostCountWithAttachment+')</br>';
                 }
             }
         }
