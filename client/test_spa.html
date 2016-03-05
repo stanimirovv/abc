@@ -50,6 +50,7 @@
   </body>
   <script>
     var boards = {};
+    var threads = {};
 
 
     if (! "onhashchange" in window) {
@@ -117,7 +118,7 @@
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
                     console.log(respPosts.Payload);
-                    var threadHtml = '<p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    var threadHtml = '<h2>'+threads[threadId].Name +'</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPost()" value="Submit post!"  />';
                     if( respPosts.Payload !== null){ //undef means there are no posts to this thread
                         for (var k = 0; k <  respPosts.Payload.length; k++){
                             console.log (respPosts.Payload[k]);
@@ -156,6 +157,7 @@
        } 
     }
 
+
     function showThreadsForBoard(){
         var boardId = location.hash.split(":")[1]; 
         document.getElementById("app").innerHTML = '<h1>'+ boards[boardId].Name +'</h1><h2>Threads:</h2> <br><a href="#new_thread:'+ boardId  +'" class="btn btn-primary">New Thread!</a><br/><br/>';
@@ -169,7 +171,9 @@
                     document.getElementById("app").innerHTML += '<p>No threads for this board</p>';
                     return;
                 }
+                
                 for (var k = 0; k <  respThreads.Payload.length; k++){
+                    threads[respThreads.Payload[k].Id] =  respThreads.Payload[k]; 
                     document.getElementById("app").innerHTML += '<a href="#thread:'+respThreads.Payload[k].Id + '" class="thread" >' +respThreads.Payload[k].Name +' </a> (Posts:' 
                                                                 + respThreads.Payload[k].PostCount  + ' Attachments: '+ respThreads.Payload[k].PostCountWithAttachment+')</br>';
                 }
@@ -191,8 +195,9 @@
 
         xmlhttp.onreadystatechange = function() {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                        var respPosts = JSON.parse(xmlhttp.responseText);
-                        getPostsForThread(threadId)
+                        var addThreadResp = JSON.parse(xmlhttp.responseText);
+                        threads[addThreadResp.Payload.Id] = addThreadResp.Payload;
+                        location.hash = "thread:" + addThreadResp.Payload.Id;
                 }   
             }
     }        
