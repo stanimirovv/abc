@@ -300,14 +300,22 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     }
 
     var threadId int
-    err = dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id", thread_name[0], board_id[0]).Scan(&threadId)
+    var threadName string
+    err = dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id, name", thread_name[0], board_id[0]).Scan(&threadId, &threadName)
 
     if err != nil {
 	glog.Error("INSERT FAILED")
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `017`, true)
     }
 
-    bytes, err1 := json.Marshal(api_request{`ok`, nil, struct{Id int}{threadId}})
+    a := struct{
+		    Id int
+		    Name string
+		}{
+		    threadId,
+		    threadName,
+		}
+    bytes, err1 := json.Marshal(api_request{`ok`, nil, a })
     if err1 != nil {
         return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `018`, true)
     }
