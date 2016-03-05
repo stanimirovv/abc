@@ -52,6 +52,8 @@ type threads struct{
     MaxPostsPerThread int
     AreAttachmentsAllowed bool
     LimitsReachedActionId int
+    PostCount int
+    PostCountWithAttachment int
 }
 
 type thread_posts struct{
@@ -117,10 +119,11 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     }
 
     api_key := values[`api_key`][0]
-    rows, err := dbh.Query(`select t.id, t.name from threads t 
+    rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
 				join boards b on b.id = t.board_id 
 				join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
-			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2;`, board_id[0], api_key)
+				left join thread_posts tp on tp.thread_id = t.id
+			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2 group by 1,2 order by t.id;`, board_id[0], api_key)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
     }
@@ -130,7 +133,7 @@ func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]by
     for rows.Next() {
 	glog.Info("Popped new thread")
         var thread threads
-        err = rows.Scan(&thread.Id, &thread.Name)
+        err = rows.Scan(&thread.Id, &thread.Name, &thread.PostCount, &thread.PostCountWithAttachment)
         if err != nil {
             return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `007`, true)
         }
