@@ -237,6 +237,10 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     }else{
 	attachment_url = &attachment_urls[0]
     }
+    
+    if(*attachment_url == ``){
+	attachment_url = nil
+    }
 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", thread_body_post[0], thread_id[0], attachment_url, req.RemoteAddr)
 
