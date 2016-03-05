@@ -1,0 +1,35 @@
+ .postBox{
+        min-height:30px;
+        /*background:gray;*/
+        border-style: solid;black;3px;
+        padding:0;
+        margin-top: 1px;
+        margin-bottom: 1px;
+        margin-right: 1px;
+        margin-left: 1px;
+    }
+
+
+    .board{
+        text-decoration: none !important;
+        display: block;
+        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        color: #4C90B5;
+        font-size: 20px;
+    }
+    .board:active {
+            background-color: yellow;
+    }
+
+    .thread{
+        text-decoration: none !important;
+        /*display: block;*/
+        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 14px;
+    }
+    .thread:active {
+            background-color: yellow;
+    }
+
+    .thread:visited {color:#4C90B5;}
+
