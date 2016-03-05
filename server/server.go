@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"os"
 	"time"
+	"strconv"
 
 	//API
 	"net/http"
@@ -24,6 +25,7 @@ TODO:
 6) quote of the day
 */
 
+// LAST STATUS ID: 20
 
 type image_board_clusters struct {
     Id int
@@ -223,7 +225,9 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     }
 
     var is_limit_reached bool
-    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached)
+    var max_post_length int
+    var min_post_length int
+    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached, &min_post_length, &max_post_length)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
     }
@@ -233,6 +237,13 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
+   if(min_post_length > len(thread_body_post[0])  && min_post_length != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(thread_body_post[0]))  +` min length: ` + strconv.Itoa(min_post_length) , `020`, false)
+    }
+   if(max_post_length < len(thread_body_post[0])  && max_post_length != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(thread_body_post[0]))  +` max length: ` + strconv.Itoa(max_post_length) , `021`, false)
+    }
+
     attachment_urls, is_passed := values[`attachment_url`]
     var attachment_url *string
     if !is_passed{
@@ -240,7 +251,7 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
     }else{
 	attachment_url = &attachment_urls[0]
     }
-    
+
     if(*attachment_url == ``){
 	attachment_url = nil
     }
@@ -352,10 +363,8 @@ func main() {
 
 
 					if err != nil{
-					    if string(reflect.TypeOf(err).Name())  == `SysErr` {
+					    if string(reflect.TypeOf(err).Name())  == `XError` {
 						res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))
-					    } else if string(reflect.TypeOf(err).Name())  == `UIErr` {
-						res.Write([]byte(`{"Status":"` + err.(xerrors.XError).Code + `","Msg":"`+ err.Error() +`","Payload":null}`))
 					    } else {
 						res.Write([]byte(`{"Status":"000","Msg":"Application Error!","Payload":null}`))
 					    }
