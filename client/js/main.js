@@ -26,7 +26,11 @@
     }
 
     window.onload = function (event) {
-        window.location.hash = "#boards";
+        if(location.hash === ''){
+            location.hash = "#boards";
+        } else {
+            $(window).trigger('hashchange');
+        }
     };
 
     window.onhashchange = locationHashChanged;
@@ -68,7 +72,7 @@
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     var respPosts = JSON.parse(xmlhttp.responseText);
                     console.log(respPosts.Payload);
-                    var threadHtml = '<h2>'+threads[threadId].Name +'</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPost()" value="Submit post!"  />';
+                    var threadHtml = '<h2>'+threads[threadId].Name +'</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPost()" value="Submit post!"  /> <input class="btn" type="button" onclick="refreshPostsForThread()" value="Refresh Posts!"  />';
                     if( respPosts.Payload !== null){ //undef means there are no posts to this thread
                         for (var k = 0; k <  respPosts.Payload.length; k++){
                             console.log (respPosts.Payload[k]);
@@ -88,6 +92,10 @@
             }
                 
         }
+    }
+    
+    function refreshPostsForThread(){
+        window.location.hash = window.location.hash; 
     }
 
     function submitNewPost(){
@@ -110,6 +118,7 @@
 
     function showThreadsForBoard(){
         var boardId = location.hash.split(":")[1]; 
+
         document.getElementById("app").innerHTML = '<h1>'+ boards[boardId].Name +'</h1><h2>Threads:</h2> <br><a href="#new_thread:'+ boardId  +'" class="btn btn-primary">New Thread!</a><br/><br/>';
         var xmlhttp1 = new XMLHttpRequest();
         xmlhttp1.open("GET", "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId);
@@ -132,7 +141,7 @@
     }
 
     function loadNewThreadTemplate(){
-        document.getElementById("app").innerHTML = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><input class="btn btn-primary" type="button" onclick="submitNewThread()" value="Submit Thread!"  />';
+        document.getElementById("app").innerHTML = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newThreadPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="submitNewThread()" value="Submit Thread!"  />';
 
     }
 
@@ -147,7 +156,15 @@
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                         var addThreadResp = JSON.parse(xmlhttp.responseText);
                         threads[addThreadResp.Payload.Id] = addThreadResp.Payload;
-                        location.hash = "thread:" + addThreadResp.Payload.Id;
+                        var xmlhttp1 = new XMLHttpRequest();
+                        xmlhttp1.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + addThreadResp.Payload.Id +
+                            "&thread_post_body=" + escape(document.getElementById('newThreadPostTextArea').value) + "&attachment_url="+escape(document.getElementById('newPostAttachUrlInp').value));
+                        xmlhttp1.send();
+                        xmlhttp1.onreadystatechange = function() {
+                            if (xmlhttp1.readyState == 4 && xmlhttp1.status == 200) {
+                                location.hash = "thread:" + addThreadResp.Payload.Id;
+                            }
                 }   
             }
-}
+        }
+    }
