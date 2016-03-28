@@ -33,7 +33,6 @@
             loadedThread = location.hash.split(":")[2]; 
             obj.getBoards(obj.showThreadsForBoardThreads).a();
         } else if(location.hash.indexOf("board:") > -1) {
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAA");
             obj.getBoards(obj.showThreadsForBoard).a();
         }
     };
