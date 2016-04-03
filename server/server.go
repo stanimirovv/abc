@@ -56,6 +56,17 @@ func Handler(res http.ResponseWriter, req *http.Request){
 	resp, err = getBoards(apiKey[0])
 
     } else if(command[0] == `getActiveThreadsForBoard`) {
+	apiKey, isPassed := values[`api_key`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    return
+	}
+	boardId, isPassed := values[`board_id`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    return
+	}
+	resp, err = getActiveThreadsForBoard(apiKey[0], boardId[0])
 
     } else if(command[0] == `getPostsForThread`) {
 
@@ -107,22 +118,13 @@ func getBoards(apiKey string)  ([]byte, error) {
 }
 
 
-func getActiveThreadsForBoard(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil || res == nil {
-        return []byte{}, xerrors.NewSysErr()
-    }
-    values := req.URL.Query()
-    board_id, is_passed := values[`board_id`]
-    if !is_passed {
-	return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `005`, true)
-    }
+func getActiveThreadsForBoard(apiKey string, boardId string)  ([]byte, error) {
 
-    api_key := values[`api_key`][0]
     rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
 				join boards b on b.id = t.board_id 
 				join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
 				left join thread_posts tp on tp.thread_id = t.id
-			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2 group by 1,2 order by t.id;`, board_id[0], api_key)
+			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2 group by 1,2 order by t.id;`, boardId, apiKey)
     if err != nil {
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
     }
