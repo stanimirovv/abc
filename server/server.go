@@ -5,7 +5,7 @@ import (
 	"github.com/golang/glog"
 	"flag"
 	"github.com/iambc/xerrors"
-	_ "reflect"
+	"reflect"
 	"os"
 	"strconv"
 	_ "github.com/gorilla/mux"
@@ -20,8 +20,17 @@ import (
 )
 
 
+var dbh *sql.DB
+var dbConnString string
+
 func main() {
     flag.Parse()
+    var err error
+    dbh, err = sql.Open("postgres", dbConnString)
+    if err != nil {
+	glog.Fatal("Connection to the database has failed")
+    }
+    dbConnString = os.Getenv("ABC_DB_CONN_STRING") 
 
     go http.ListenAndServe(":"+os.Getenv("ABC_FILES_SERVER_URL"), http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR"))))
     http.HandleFunc("/api", Handler)
@@ -30,13 +39,21 @@ func main() {
 
 func Handler(res http.ResponseWriter, req *http.Request){
     values := req.URL.Query()
-    command, is_passed := values[`command`]
-    if !is_passed {
+    command, isPassed := values[`command`]
+    if !isPassed {
 	res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
 	return
     }
 
+    var resp []byte
+    var err error
     if(command[0] == `getBoards` ) {
+	apiKey, isPassed := values[`api_key`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    return
+	}
+	resp, err = getBoards(apiKey[0])
 
     } else if(command[0] == `getActiveThreadsForBoard`) {
 
@@ -52,7 +69,6 @@ func Handler(res http.ResponseWriter, req *http.Request){
     }
 
     res.Header().Set("Access-Control-Allow-Origin", "*")
-    bytes, err := commands[command[0]](res, req)
     if err != nil{
 	if string(reflect.TypeOf(err).Name())  == `XError` {
 	    res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))
@@ -62,18 +78,13 @@ func Handler(res http.ResponseWriter, req *http.Request){
 	glog.Error(err)
 	    return
     }
-    res.Write(bytes)
+    res.Write(resp)
 
 }
 
-func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil || res == nil {
-	return []byte{}, xerrors.NewSysErr()
-    }
+func getBoards(apiKey string)  ([]byte, error) {
 
-    values := req.URL.Query()
-    api_key := values[`api_key`][0]
-    rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", api_key)
+    rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", apiKey)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
     }
