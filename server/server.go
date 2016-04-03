@@ -5,10 +5,10 @@ import (
 	"github.com/golang/glog"
 	"flag"
 	"github.com/iambc/xerrors"
-	"reflect"
+	_ "reflect"
 	"os"
-	"time"
 	"strconv"
+	_ "github.com/gorilla/mux"
 
 	//API
 	"net/http"
@@ -19,10 +19,52 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// LAST STATUS ID: 20
 
+func main() {
+    flag.Parse()
 
+    go http.ListenAndServe(":"+os.Getenv("ABC_FILES_SERVER_URL"), http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR"))))
+    http.HandleFunc("/api", Handler)
+    http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
+}
 
+func Handler(res http.ResponseWriter, req *http.Request){
+    values := req.URL.Query()
+    command, is_passed := values[`command`]
+    if !is_passed {
+	res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
+	return
+    }
+
+    if(command[0] == `getBoards` ) {
+
+    } else if(command[0] == `getActiveThreadsForBoard`) {
+
+    } else if(command[0] == `getPostsForThread`) {
+
+    } else if(command[0] == `addPostToThread`) {
+
+    } else if(command[0] == `addThread`) {
+
+    } else {
+	res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
+	glog.Error("command: ", command[0])
+    }
+
+    res.Header().Set("Access-Control-Allow-Origin", "*")
+    bytes, err := commands[command[0]](res, req)
+    if err != nil{
+	if string(reflect.TypeOf(err).Name())  == `XError` {
+	    res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))
+	} else {
+	    res.Write([]byte(`{"Status":"000","Msg":"Application Error!","Payload":null}`))
+	}
+	glog.Error(err)
+	    return
+    }
+    res.Write(bytes)
+
+}
 
 func getBoards(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
     if req == nil || res == nil {
@@ -267,71 +309,6 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     return bytes, nil
 }
 
-var dbConnString = ``
-var dbh *sql.DB
 
-// sample usage
-func main() {
-    flag.Parse()
-
-    var err error
-    dbConnString = os.Getenv("ABC_DB_CONN_STRING") // DB will return error if empty string
-    dbh, err = sql.Open("postgres", dbConnString)
-    if err != nil {
-	glog.Fatal(err)
-    }
-
-    commands := map[string]func(http.ResponseWriter, *http.Request) ([]byte, error){
-				"getBoards": getBoards,
-				"getActiveThreadsForBoard": getActiveThreadsForBoard,
-				"getPostsForThread": getPostsForThread,
-				"addPostToThread": addPostToThread,
-				"addThread": addThread,
-			       }
-
-    http.HandleFunc("/api", func(res http.ResponseWriter, req *http.Request) {
-					values := req.URL.Query()
-					command, is_passed := values[`command`]
-					if !is_passed {
-					    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
-					    return
-					}
-
-
-					_, is_passed = values[`api_key`]
-					if !is_passed {
-					    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
-					    return
-					}
-
-					_, is_passed = commands[command[0]]
-					if !is_passed{
-					    res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
-					    glog.Error("command: ", command[0])
-					    return
-					}
-
-					res.Header().Set("Access-Control-Allow-Origin", "*")
-					bytes, err := commands[command[0]](res, req)
-
-
-					if err != nil{
-					    if string(reflect.TypeOf(err).Name())  == `XError` {
-						res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))
-					    } else {
-						res.Write([]byte(`{"Status":"000","Msg":"Application Error!","Payload":null}`))
-					    }
-					    glog.Error(err)
-					    return
-					}
-
-					glog.Info(string(bytes))
-					res.Write(bytes)
-    })
-
-    http.Handle("/f/", http.StripPrefix("/f/", http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR")))))
-
-    http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
-}
 
 
