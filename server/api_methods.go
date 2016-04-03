@@ -19,16 +19,16 @@ func getBoards(apiKey string)  ([]byte, error) {
     }
     defer rows.Close()
 
-    var curr_boards []boards
+    var currBoards []boards
     for rows.Next() {
 	var board boards
 	err = rows.Scan(&board.Id, &board.Name, &board.Descr)
 	if err != nil {
 	    return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `003`, true)
 	}
-	curr_boards = append(curr_boards, board)
+	currBoards = append(currBoards, board)
     }
-    bytes, err1 := json.Marshal(api_request{"ok", nil, &curr_boards})
+    bytes, err1 := json.Marshal(api_request{"ok", nil, &currBoards})
     if err1 != nil {
 	return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `004`, true)
     }
@@ -48,7 +48,7 @@ func getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
     }
     defer rows.Close()
 
-    var active_threads []threads
+    var activeThreads []threads
     for rows.Next() {
 	glog.Info("Popped new thread")
         var thread threads
@@ -56,15 +56,15 @@ func getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
         if err != nil {
             return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `007`, true)
         }
-        active_threads = append(active_threads, thread)
+        activeThreads = append(activeThreads, thread)
     }
     var bytes []byte
     var err1 error
-    if(len(active_threads) == 0){
+    if(len(activeThreads) == 0){
         errMsg := "No objects returned."
-        bytes, err1 = json.Marshal(api_request{"error", &errMsg, &active_threads})
+        bytes, err1 = json.Marshal(api_request{"error", &errMsg, &activeThreads})
     }else {
-        bytes, err1 = json.Marshal(api_request{"ok", nil, &active_threads})
+        bytes, err1 = json.Marshal(api_request{"ok", nil, &activeThreads})
     }
 
     if err1 != nil {
@@ -87,25 +87,25 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
     }
     defer rows.Close()
 
-    var curr_posts []thread_posts
+    var currPosts []thread_posts
     for rows.Next() {
 	glog.Info("new post for thread with id: ", threadId)
-        var curr_post thread_posts
-        err = rows.Scan(&curr_post.Id, &curr_post.Body, &curr_post.AttachmentUrl, &curr_post.InsertedAt, &curr_post.SourceIp)
+        var currPost thread_posts
+        err = rows.Scan(&currPost.Id, &currPost.Body, &currPost.AttachmentUrl, &currPost.InsertedAt, &currPost.SourceIp)
         if err != nil {
 	    glog.Error(err)
             return []byte{}, xerrors.NewSysErr()
         }
-        curr_posts = append(curr_posts, curr_post)
+        currPosts = append(currPosts, currPost)
     }
 
     var bytes []byte
     var err1 error
-    if(len(curr_posts) == 0){
+    if(len(currPosts) == 0){
 	errMsg := "No objects returned."
-	bytes, err1 = json.Marshal(api_request{"error", &errMsg, &curr_posts})
+	bytes, err1 = json.Marshal(api_request{"error", &errMsg, &currPosts})
     }else {
-	bytes, err1 = json.Marshal(api_request{"ok", nil, &curr_posts})
+	bytes, err1 = json.Marshal(api_request{"ok", nil, &currPosts})
     }
 
     if err1 != nil {
@@ -117,24 +117,24 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
 
 
 func addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte,error) {
-    var is_limit_reached bool
-    var max_post_length int
-    var min_post_length int
-    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadId).Scan(&is_limit_reached, &min_post_length, &max_post_length)
+    var isLimitReached bool
+    var maxPostLength int
+    var minPostLength int
+    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadId).Scan(&isLimitReached, &minPostLength, &maxPostLength)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
     }
 
-    if is_limit_reached {
+    if isLimitReached {
 	dbh.QueryRow("UPDATE threads set is_active = false where id = $1", threadId).Scan()
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
-   if(min_post_length > len(threadBodyPost)  && min_post_length != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` min length: ` + strconv.Itoa(min_post_length) , `020`, false)
+   if(minPostLength > len(threadBodyPost)  && minPostLength != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` min length: ` + strconv.Itoa(minPostLength) , `020`, false)
     }
-   if(max_post_length < len(threadBodyPost)  && max_post_length != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` max length: ` + strconv.Itoa(max_post_length) , `021`, false)
+   if(maxPostLength < len(threadBodyPost)  && maxPostLength != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` max length: ` + strconv.Itoa(maxPostLength) , `021`, false)
     }
 
     _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadId, attachmentUrl, clientRemoteAddr)
@@ -154,13 +154,13 @@ func addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string,
 
 
 func addThread(boardId int, threadName string) ([]byte, error) {
-    var is_limit_reached bool
-    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&is_limit_reached)
+    var isLimitReached bool
+    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&isLimitReached)
     if err != nil {
 	glog.Error("COULD NOT SELECT thread_count")
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `015`, true)
     }
-    if is_limit_reached {
+    if isLimitReached {
 	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `016`, true)
     }
 
