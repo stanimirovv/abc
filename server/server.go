@@ -74,10 +74,69 @@ func Handler(res http.ResponseWriter, req *http.Request){
 	resp, err = getActiveThreadsForBoard(apiKey[0], boardIdInt)
 
     } else if(command[0] == `getPostsForThread`) {
+	apiKey, isPassed := values[`api_key`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    return
+	}
+	threadId, isPassed := values[`thread_id`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    return
+	}
+	threadIdInt, err := strconv.Atoi(threadId[0])
+	if err != nil {
+	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+	    return
+	}
+	resp, err = getPostsForThread(apiKey[0], threadIdInt)
 
     } else if(command[0] == `addPostToThread`) {
+	threadId, isPassed := values[`thread_id`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    return
+	}
+	threadIdInt, err := strconv.Atoi(threadId[0])
+	if err != nil {
+	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+	    return
+	}
+	threadBodyPost, isPassed := values[`thread_body_post`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'thread_body_post' is undefined.","Payload":null}`))
+	    return
+	}
+	attachmentUrl, isPassed := values[`attachment_id`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'attachment_id' is undefined.","Payload":null}`))
+	    return
+	}
+	clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'clientRemoteAddr' is undefined.","Payload":null}`))
+	    return
+	}
+	resp, err = addPostToThread(threadIdInt, threadBodyPost[0], &attachmentUrl[0], clientRemoteAddr[0])
+
 
     } else if(command[0] == `addThread`) {
+	boardId, isPassed := values[`board_id`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    return
+	}
+	boardIdInt, err := strconv.Atoi(boardId[0])
+	if err != nil {
+	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+	    return
+	}
+	threadName, isPassed := values[`thread_name`]
+	if !isPassed {
+	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'thread_name' is undefined.","Payload":null}`))
+	    return
+	}
+	resp, err = addThread(boardIdInt, threadName[0])
 
     } else {
 	res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
@@ -203,54 +262,28 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
 }
 
 
-func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
-    if req == nil || res == nil{
-        return []byte{}, xerrors.NewSysErr()
-    }
-    values := req.URL.Query()
-    thread_id, is_passed := values[`thread_id`]
-    if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `001`, true)
-    }
-
-    thread_body_post, is_passed := values[`thread_post_body`]
-    if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_post_body given!`, `Invalid params: No thread_post_body given!`, `001`, true)
-    }
-
+func addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte,error) {
     var is_limit_reached bool
     var max_post_length int
     var min_post_length int
-    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", thread_id[0]).Scan(&is_limit_reached, &min_post_length, &max_post_length)
+    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadId).Scan(&is_limit_reached, &min_post_length, &max_post_length)
     if err != nil {
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
     }
 
     if is_limit_reached {
-	dbh.QueryRow("UPDATE threads set is_active = false where id = $1",  thread_id[0]).Scan()
+	dbh.QueryRow("UPDATE threads set is_active = false where id = $1", threadId).Scan()
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
-   if(min_post_length > len(thread_body_post[0])  && min_post_length != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(thread_body_post[0]))  +` min length: ` + strconv.Itoa(min_post_length) , `020`, false)
+   if(min_post_length > len(threadBodyPost)  && min_post_length != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` min length: ` + strconv.Itoa(min_post_length) , `020`, false)
     }
-   if(max_post_length < len(thread_body_post[0])  && max_post_length != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(thread_body_post[0]))  +` max length: ` + strconv.Itoa(max_post_length) , `021`, false)
-    }
-
-    attachment_urls, is_passed := values[`attachment_url`]
-    var attachment_url *string
-    if !is_passed{
-	attachment_url = nil
-    }else{
-	attachment_url = &attachment_urls[0]
+   if(max_post_length < len(threadBodyPost)  && max_post_length != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` max length: ` + strconv.Itoa(max_post_length) , `021`, false)
     }
 
-    if(*attachment_url == ``){
-	attachment_url = nil
-    }
-
-    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", thread_body_post[0], thread_id[0], attachment_url, req.RemoteAddr)
+    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadId, attachmentUrl, clientRemoteAddr)
 
     if err != nil {
 	glog.Error(err)
@@ -266,25 +299,9 @@ func addPostToThread(res http.ResponseWriter, req *http.Request) ([]byte,error) 
 }
 
 
-func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
-    if req == nil || res == nil{
-        return []byte{}, xerrors.NewSysErr()
-    }
-    values := req.URL.Query()
-
-    thread_name, is_passed := values[`thread_name`]
-    if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No thread_name given!`, `Invalid params: No thread_name given!`, `013`, true)
-    }
-
-    board_id, is_passed := values[`board_id`]
-    if !is_passed {
-        return []byte{}, xerrors.NewUIErr(`Invalid params: No board_id given!`, `Invalid params: No board_id given!`, `014`, true)
-    }
-
-
+func addThread(boardId int, threadName string) ([]byte, error) {
     var is_limit_reached bool
-    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", board_id[0]).Scan(&is_limit_reached)
+    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&is_limit_reached)
     if err != nil {
 	glog.Error("COULD NOT SELECT thread_count")
 	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `015`, true)
@@ -294,8 +311,7 @@ func addThread(res http.ResponseWriter, req *http.Request) ([]byte,error) {
     }
 
     var threadId int
-    var threadName string
-    err = dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id, name", thread_name[0], board_id[0]).Scan(&threadId, &threadName)
+    err = dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id, name", threadName, boardId).Scan(&threadId, &threadName)
 
     if err != nil {
 	glog.Error("INSERT FAILED")
