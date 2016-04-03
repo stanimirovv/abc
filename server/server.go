@@ -66,7 +66,12 @@ func Handler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
 	    return
 	}
-	resp, err = getActiveThreadsForBoard(apiKey[0], boardId[0])
+	boardIdInt, err := strconv.Atoi(boardId[0])
+	if err != nil {
+	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+	    return
+	}
+	resp, err = getActiveThreadsForBoard(apiKey[0], boardIdInt)
 
     } else if(command[0] == `getPostsForThread`) {
 
@@ -118,7 +123,7 @@ func getBoards(apiKey string)  ([]byte, error) {
 }
 
 
-func getActiveThreadsForBoard(apiKey string, boardId string)  ([]byte, error) {
+func getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
 
     rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
 				join boards b on b.id = t.board_id 
@@ -157,17 +162,7 @@ func getActiveThreadsForBoard(apiKey string, boardId string)  ([]byte, error) {
 }
 
 
-func getPostsForThread(res http.ResponseWriter, req *http.Request)  ([]byte, error) {
-    if req == nil || res == nil {
-        return []byte{}, xerrors.NewSysErr()
-    }
-    values := req.URL.Query()
-    thread_id, is_passed := values[`thread_id`]
-    if !is_passed {
-        return []byte{},xerrors.NewUIErr(`Invalid params: No thread_id given!`, `Invalid params: No thread_id given!`, `006`, true)
-    }
-
-    api_key := values[`api_key`][0]
+func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
     rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip 
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
