@@ -1,5 +1,9 @@
 package main
 
+/*
+This file initializes the 
+*/
+
 import (
 	// General
 	"github.com/golang/glog"
@@ -23,6 +27,7 @@ var dbConnString string
 func main() {
     flag.Parse()
     var err error
+    dbConnString = os.Getenv("ABC_DB_CONN_STRING")
     dbh, err = sql.Open("postgres", dbConnString)
     if err != nil {
 	glog.Fatal("Connection to the database has failed")
@@ -30,11 +35,11 @@ func main() {
     dbConnString = os.Getenv("ABC_DB_CONN_STRING") 
 
     go http.ListenAndServe(":"+os.Getenv("ABC_FILES_SERVER_URL"), http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR"))))
-    http.HandleFunc("/api", Handler)
+    http.HandleFunc("/api", QueryStringHandler)
     http.ListenAndServe(`:`+ os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
 }
 
-func Handler(res http.ResponseWriter, req *http.Request){
+func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     values := req.URL.Query()
     command, isPassed := values[`command`]
     if !isPassed {
