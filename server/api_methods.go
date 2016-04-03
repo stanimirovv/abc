@@ -1,5 +1,9 @@
 package main
 
+/*
+This file contains all of the API functions.
+*/
+
 import (
 "encoding/json"
 	"github.com/iambc/xerrors"
