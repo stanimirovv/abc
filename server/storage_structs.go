@@ -1,4 +1,4 @@
-// Contains *all* custom structs
+// Contains *all* storage structs
 package main
 
 import "time"
