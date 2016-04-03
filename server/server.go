@@ -167,7 +167,7 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
 						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
-			    where tp.thread_id = $1 and ibc.api_key = $2 and t.is_active = true;`, thread_id[0], api_key)
+			    where tp.thread_id = $1 and ibc.api_key = $2 and t.is_active = true;`, threadId, apiKey)
     if err != nil {
 	glog.Error(err)
         return []byte{}, xerrors.NewSysErr()
@@ -176,7 +176,7 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
 
     var curr_posts []thread_posts
     for rows.Next() {
-	glog.Info("new post for thread with id: ", thread_id[0])
+	glog.Info("new post for thread with id: ", threadId)
         var curr_post thread_posts
         err = rows.Scan(&curr_post.Id, &curr_post.Body, &curr_post.AttachmentUrl, &curr_post.InsertedAt, &curr_post.SourceIp)
         if err != nil {
