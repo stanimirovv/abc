@@ -1,4 +1,11 @@
 // Contains *all* custom structs
+package main
+
+import "time"
+
+type app struct {
+
+}
 
 type image_board_clusters struct {
     Id int
