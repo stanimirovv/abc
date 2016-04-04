@@ -1,4 +1,4 @@
-// Contains *all* storage structs
+// Contains *all* custom structs
 package main
 
 import "time"
@@ -36,6 +36,8 @@ type threads struct{
     LimitsReachedActionId int
     PostCount int
     PostCountWithAttachment int
+    MinPostLength int // to be checked in insert post
+    MaxPostLength int // to be checked in insert post
 }
 
 type thread_posts struct{
