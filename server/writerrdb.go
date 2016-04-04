@@ -56,8 +56,30 @@ func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardId int) (activ
     return activeThreads, nil
 }
 
-func (db *writerrdb) getPostsForThread(apiKey string, threadId int) []thread_posts {
+func (db *writerrdb) getPostsForThread(apiKey string, threadId int) (currPosts []thread_posts, err error) {
+    rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip 
+			    from thread_posts tp join threads t on t.id = tp.thread_id 
+						 join boards b on b.id = t.board_id 
+						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
+			    where tp.thread_id = $1 and ibc.api_key = $2 and t.is_active = true;`, threadId, apiKey)
+    if err != nil {
+	glog.Error(err)
+        return currPosts, xerrors.NewSysErr()
+    }
+    defer rows.Close()
 
+    var currPosts []thread_posts
+    for rows.Next() {
+	glog.Info("new post for thread with id: ", threadId)
+        var currPost thread_posts
+        err = rows.Scan(&currPost.Id, &currPost.Body, &currPost.AttachmentUrl, &currPost.InsertedAt, &currPost.SourceIp)
+        if err != nil {
+	    glog.Error(err)
+            return currPosts, xerrors.NewSysErr()
+        }
+        currPosts = append(currPosts, currPost)
+    }
+    currPosts, err
 }
 
 func (db *writerrdb) addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) error {
