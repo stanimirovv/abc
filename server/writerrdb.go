@@ -32,8 +32,28 @@ func (db *writerrdb) getBoards(apiKey string) (currBoards []boards, err error) {
     return currBoards, nil
 }
 
-func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardId int) []threads {
+func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardId int) (activeThreads []threads, err error) {
+    rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
+				join boards b on b.id = t.board_id 
+				join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
+				left join thread_posts tp on tp.thread_id = t.id
+			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2 group by 1,2 order by t.id;`, boardId, apiKey)
+    if err != nil {
+        return activeThreads, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
+    }
+    defer rows.Close()
 
+    var activeThreads []threads
+    for rows.Next() {
+	glog.Info("Popped new thread")
+        var thread threads
+        err = rows.Scan(&thread.Id, &thread.Name, &thread.PostCount, &thread.PostCountWithAttachment)
+        if err != nil {
+            return activeThreads, xerrors.NewUIErr(err.Error(), err.Error(), `007`, true)
+        }
+        activeThreads = append(activeThreads, thread)
+    }
+    return activeThreads, nil
 }
 
 func (db *writerrdb) getPostsForThread(apiKey string, threadId int) []thread_posts {
