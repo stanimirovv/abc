@@ -11,6 +11,8 @@ import (
 var dbh *sql.DB
 var dbConnString string
 
+//TODO initialization
+
 //Relational database implementation for writer interface
 type writerrdb struct {
 }
@@ -115,10 +117,12 @@ func (db *writerrdb) isThreadLimitReached(boardId int) (bool, error) {
 }
 
 
-//TODO
-/*
-func (db *writerrdb) getPostCountForThread(threadId int) (int, error){
-
-
+func (db *writerrdb) isPostLimitReached(threadId int) (bool, threads, error){
+    var isLimitReached bool
+    var thread threads
+    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadId).Scan(&isLimitReached, &thread.MinPostLength, &thread.MaxPostLength)
+    if err != nil {
+	return true, thread, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
+    }
+    return isLimitReached, thread, err
 }
-*/
