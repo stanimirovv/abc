@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	"github.com/iambc/xerrors"
+	"github.com/golang/glog"
 )
 
 var dbh *sql.DB
@@ -43,7 +44,6 @@ func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardId int) (activ
     }
     defer rows.Close()
 
-    var activeThreads []threads
     for rows.Next() {
 	glog.Info("Popped new thread")
         var thread threads
@@ -68,7 +68,6 @@ func (db *writerrdb) getPostsForThread(apiKey string, threadId int) (currPosts [
     }
     defer rows.Close()
 
-    var currPosts []thread_posts
     for rows.Next() {
 	glog.Info("new post for thread with id: ", threadId)
         var currPost thread_posts
@@ -79,16 +78,38 @@ func (db *writerrdb) getPostsForThread(apiKey string, threadId int) (currPosts [
         }
         currPosts = append(currPosts, currPost)
     }
-    currPosts, err
+    return currPosts, err
 }
 
-func (db *writerrdb) addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) error {
+func (db *writerrdb) addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) (err error) {
+    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadId, attachmentUrl, clientRemoteAddr)
+
+    if err != nil {
+	glog.Error(err)
+        return xerrors.NewUIErr(err.Error(), err.Error(), `011`, true)
+    }
+    return nil
 }
 
 func (db *writerrdb) addThread(boardId int, threadName string) (threads, error) {
 
+    var threadId int
+    err := dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id, name", threadName, boardId).Scan(&threadId, &threadName)
+
+    if err != nil {
+	glog.Error("INSERT FAILED")
+        return threads{Id:-1, Name:`err`}, xerrors.NewUIErr(err.Error(), err.Error(), `017`, true)
+    }
+    return threads{Id:threadId, Name:threadName}, nil
 }
 
+//TODO
+/*
 func (db *writerrdb) getThreadCount(boardId int) (int, error) {
 
 }
+
+func (db *writerrdb) getPostCountForThread(threadId int) (int, error){
+
+}
+*/
