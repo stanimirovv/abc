@@ -11,7 +11,11 @@ import (
 	"strconv"
 	)
 
-func getBoards(apiKey string)  ([]byte, error) {
+type abc_api struct {
+    storage_type string
+}
+
+func (api *abc_api) getBoards(apiKey string)  ([]byte, error) {
 
     rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", apiKey)
     if err != nil {
@@ -36,7 +40,7 @@ func getBoards(apiKey string)  ([]byte, error) {
 }
 
 
-func getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
+func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
 
     rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
 				join boards b on b.id = t.board_id 
@@ -75,7 +79,7 @@ func getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
 }
 
 
-func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
+func (api *abc_api) getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
     rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip 
 			    from thread_posts tp join threads t on t.id = tp.thread_id 
 						 join boards b on b.id = t.board_id 
@@ -116,7 +120,7 @@ func getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
 }
 
 
-func addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte,error) {
+func (api *abc_api) addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte,error) {
     var isLimitReached bool
     var maxPostLength int
     var minPostLength int
@@ -153,7 +157,7 @@ func addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string,
 }
 
 
-func addThread(boardId int, threadName string) ([]byte, error) {
+func (api *abc_api) addThread(boardId int, threadName string) ([]byte, error) {
     var isLimitReached bool
     err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&isLimitReached)
     if err != nil {

@@ -23,6 +23,7 @@ import (
 
 var dbh *sql.DB
 var dbConnString string
+var api abc_api
 
 func main() {
     flag.Parse()
@@ -55,7 +56,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
 	    return
 	}
-	resp, err = getBoards(apiKey[0])
+	resp, err = api.getBoards(apiKey[0])
 
     } else if(command[0] == `getActiveThreadsForBoard`) {
 	apiKey, isPassed := values[`api_key`]
@@ -73,7 +74,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
 	    return
 	}
-	resp, err = getActiveThreadsForBoard(apiKey[0], boardIdInt)
+	resp, err = api.getActiveThreadsForBoard(apiKey[0], boardIdInt)
 
     } else if(command[0] == `getPostsForThread`) {
 	apiKey, isPassed := values[`api_key`]
@@ -91,7 +92,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
 	    return
 	}
-	resp, err = getPostsForThread(apiKey[0], threadIdInt)
+	resp, err = api.getPostsForThread(apiKey[0], threadIdInt)
 
     } else if(command[0] == `addPostToThread`) {
 	threadId, isPassed := values[`thread_id`]
@@ -119,7 +120,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'clientRemoteAddr' is undefined.","Payload":null}`))
 	    return
 	}
-	resp, err = addPostToThread(threadIdInt, threadBodyPost[0], &attachmentUrl[0], clientRemoteAddr[0])
+	resp, err = api.addPostToThread(threadIdInt, threadBodyPost[0], &attachmentUrl[0], clientRemoteAddr[0])
 
 
     } else if(command[0] == `addThread`) {
@@ -138,7 +139,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'thread_name' is undefined.","Payload":null}`))
 	    return
 	}
-	resp, err = addThread(boardIdInt, threadName[0])
+	resp, err = api.addThread(boardIdInt, threadName[0])
 
     } else {
 	res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
