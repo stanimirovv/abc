@@ -103,13 +103,22 @@ func (db *writerrdb) addThread(boardId int, threadName string) (threads, error) 
     return threads{Id:threadId, Name:threadName}, nil
 }
 
-//TODO
-/*
-func (db *writerrdb) getThreadCount(boardId int) (int, error) {
+func (db *writerrdb) isThreadLimitReached(boardId int) (bool, error) {
+    var isLimitReached bool
+    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&isLimitReached)
+    if err != nil {
+	glog.Error("COULD NOT SELECT thread_count")
+	return true, xerrors.NewUIErr(err.Error(), err.Error(), `015`, true)
+    }
 
+    return isLimitReached, nil
 }
 
+
+//TODO
+/*
 func (db *writerrdb) getPostCountForThread(threadId int) (int, error){
+
 
 }
 */
