@@ -1,5 +1,6 @@
 package main
 
+
 /*
 This file initializes the 
 */
@@ -21,8 +22,6 @@ import (
 )
 
 
-var dbh *sql.DB
-var dbConnString string
 var api abc_api
 
 func main() {
