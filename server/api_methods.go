@@ -13,28 +13,18 @@ import (
 
 type abc_api struct {
     storage_type string
+    wr Writer
 }
 
 func (api *abc_api) getBoards(apiKey string)  ([]byte, error) {
 
-    rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", apiKey)
+    currBoards, err := api.wr.getBoards(apiKey)
     if err != nil {
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
+	return []byte{}, err
     }
-    defer rows.Close()
-
-    var currBoards []boards
-    for rows.Next() {
-	var board boards
-	err = rows.Scan(&board.Id, &board.Name, &board.Descr)
-	if err != nil {
-	    return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `003`, true)
-	}
-	currBoards = append(currBoards, board)
-    }
-    bytes, err1 := json.Marshal(api_request{"ok", nil, &currBoards})
-    if err1 != nil {
-	return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `004`, true)
+    bytes, err := json.Marshal(api_request{"ok", nil, &currBoards})
+    if err != nil {
+	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `004`, true)
     }
     return bytes, nil
 }
@@ -42,37 +32,20 @@ func (api *abc_api) getBoards(apiKey string)  ([]byte, error) {
 
 func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardId int)  ([]byte, error) {
 
-    rows, err := dbh.Query(`select t.id, t.name, count(*), (select count(*) from thread_posts where thread_id = t.id and attachment_url is not null) from threads t  
-				join boards b on b.id = t.board_id 
-				join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
-				left join thread_posts tp on tp.thread_id = t.id
-			    where t.is_active = TRUE and t.board_id = $1 and ibc.api_key = $2 group by 1,2 order by t.id;`, boardId, apiKey)
+    activeThreads, err := api.wr.getActiveThreadsForBoard(apiKey, boardId)
     if err != nil {
-        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
-    }
-    defer rows.Close()
-
-    var activeThreads []threads
-    for rows.Next() {
-	glog.Info("Popped new thread")
-        var thread threads
-        err = rows.Scan(&thread.Id, &thread.Name, &thread.PostCount, &thread.PostCountWithAttachment)
-        if err != nil {
-            return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `007`, true)
-        }
-        activeThreads = append(activeThreads, thread)
+	return []byte{}, err
     }
     var bytes []byte
-    var err1 error
     if(len(activeThreads) == 0){
         errMsg := "No objects returned."
-        bytes, err1 = json.Marshal(api_request{"error", &errMsg, &activeThreads})
+        bytes, err = json.Marshal(api_request{"error", &errMsg, &activeThreads})
     }else {
-        bytes, err1 = json.Marshal(api_request{"ok", nil, &activeThreads})
+        bytes, err = json.Marshal(api_request{"ok", nil, &activeThreads})
     }
 
-    if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `008`, true)
+    if err != nil {
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `008`, true)
     }
 
     return bytes, nil
