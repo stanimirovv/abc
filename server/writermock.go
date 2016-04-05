@@ -19,6 +19,8 @@ func (db *writermock) getBoards(apiKey string) (currBoards []boards, err error) 
 func (db *writermock) getActiveThreadsForBoard(apiKey string, boardId int) (activeThreads []threads, err error) {
     if apiKey == `err` {
 	return activeThreads, xerrors.NewUIErr(`test err`, `test err`, `002`, true)
+    } else if apiKey == `empty` {
+	return activeThreads, nil
     }
     activeThreads = append(activeThreads, threads{Id:1, Name:`Mock Thread`})
     return activeThreads, nil
@@ -28,6 +30,8 @@ func (db *writermock) getActiveThreadsForBoard(apiKey string, boardId int) (acti
 func (db *writermock) getPostsForThread(apiKey string, threadId int) (currPosts []thread_posts, err error) {
     if apiKey == `err` {
 	return currPosts, xerrors.NewUIErr(`test err`, `test err`, `002`, true)
+    } else if apiKey == `empty` {
+	return currPosts, nil
     }
     currPosts = append(currPosts, thread_posts{})
     return currPosts, nil
