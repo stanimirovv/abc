@@ -11,8 +11,6 @@ import (
 var dbh *sql.DB
 var dbConnString string
 
-//TODO initialization
-
 //Relational database implementation for writer interface
 type writerrdb struct {
     dbh *sql.DB
