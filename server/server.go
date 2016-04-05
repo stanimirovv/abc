@@ -32,6 +32,10 @@ func main() {
     if err != nil {
 	glog.Fatal("Connection to the database has failed")
     }
+    
+    wrdb := writerrdb{dbh} 
+    api.wr = &wrdb
+
     dbConnString = os.Getenv("ABC_DB_CONN_STRING") 
 
     go http.ListenAndServe(":"+os.Getenv("ABC_FILES_SERVER_URL"), http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR"))))
