@@ -5,7 +5,7 @@ This file contains all of the API functions.
 */
 
 import (
-"encoding/json"
+	"encoding/json"
 	"github.com/iambc/xerrors"
 	"github.com/golang/glog"
 	"strconv"
