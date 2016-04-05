@@ -44,6 +44,7 @@ func main() {
 }
 
 func QueryStringHandler(res http.ResponseWriter, req *http.Request){
+    res.Header().Set("Access-Control-Allow-Origin", "*")
     values := req.URL.Query()
     command, isPassed := values[`command`]
     if !isPassed {
@@ -149,7 +150,6 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	glog.Error("command: ", command[0])
     }
 
-    res.Header().Set("Access-Control-Allow-Origin", "*")
     if err != nil{
 	if string(reflect.TypeOf(err).Name())  == `XError` {
 	    res.Write([]byte(`{"Status":"`+ err.(xerrors.XError).Code +`","Msg":"` + err.Error()  +`","Payload":null}`))

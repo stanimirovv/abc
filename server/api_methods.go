@@ -72,36 +72,35 @@ func (api *abc_api) getPostsForThread(apiKey string, threadId int)  ([]byte, err
 
 
 func (api *abc_api) addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte,error) {
-    var isLimitReached bool
-    var maxPostLength int
-    var minPostLength int
-    err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadId).Scan(&isLimitReached, &minPostLength, &maxPostLength)
+    isLimitReached, thr, err := api.wr.isPostLimitReached(threadId)
+
     if err != nil {
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
+	return []byte{}, err
     }
 
     if isLimitReached {
-	dbh.QueryRow("UPDATE threads set is_active = false where id = $1", threadId).Scan()
+	api.wr.archiveThread(threadId)
 	return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
     }
 
-   if(minPostLength > len(threadBodyPost)  && minPostLength != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` min length: ` + strconv.Itoa(minPostLength) , `020`, false)
+   if(thr.MinPostLength > len(threadBodyPost)  && thr.MinPostLength != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` min length: ` + strconv.Itoa(thr.MinPostLength) , `020`, false)
     }
-   if(maxPostLength < len(threadBodyPost)  && maxPostLength != -1){
-	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` max length: ` + strconv.Itoa(maxPostLength) , `021`, false)
+   if(thr.MaxPostLength < len(threadBodyPost)  && thr.MaxPostLength != -1){
+	return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: ` + strconv.Itoa(len(threadBodyPost))  +` max length: ` + strconv.Itoa(thr.MaxPostLength) , `021`, false)
     }
 
-    _, err = dbh.Query("INSERT INTO thread_posts(body, thread_id, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadId, attachmentUrl, clientRemoteAddr)
+    err = api.wr.addPostToThread(threadId, threadBodyPost, attachmentUrl, clientRemoteAddr)
 
     if err != nil {
 	glog.Error(err)
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `011`, true)
     }
 
-    bytes, err1 := json.Marshal(api_request{"ok", nil, nil})
-    if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `012`, true)
+    var bytes []byte
+    bytes, err = json.Marshal(api_request{"ok", nil, nil})
+    if err != nil {
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `012`, true)
     }
 
     return bytes, nil
@@ -109,19 +108,18 @@ func (api *abc_api) addPostToThread(threadId int, threadBodyPost string, attachm
 
 
 func (api *abc_api) addThread(boardId int, threadName string) ([]byte, error) {
-    var isLimitReached bool
-    err := dbh.QueryRow("select (select count(*) from threads  where board_id = $1) > thread_setting_max_thread_count  from boards where id = $1;", boardId).Scan(&isLimitReached)
+
+    isLimitReached, err := api.wr.isThreadLimitReached(boardId)
+
     if err != nil {
-	glog.Error("COULD NOT SELECT thread_count")
-	return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `015`, true)
+	return []byte{}, err
     }
+
     if isLimitReached {
 	return []byte{}, xerrors.NewUIErr(`Thread limit reached!`, `Thread limit reached!`, `016`, true)
     }
 
-    var threadId int
-    err = dbh.QueryRow("INSERT INTO threads(name, board_id, limits_reached_action_id, max_posts_per_thread) VALUES($1, $2, 1, 10)  RETURNING id, name", threadName, boardId).Scan(&threadId, &threadName)
-
+    thr, err := api.wr.addThread(boardId, threadName)
     if err != nil {
 	glog.Error("INSERT FAILED")
         return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `017`, true)
@@ -131,12 +129,13 @@ func (api *abc_api) addThread(boardId int, threadName string) ([]byte, error) {
 		    Id int
 		    Name string
 		}{
-		    threadId,
-		    threadName,
+		    thr.Id,
+		    thr.Name,
 		}
-    bytes, err1 := json.Marshal(api_request{`ok`, nil, a })
-    if err1 != nil {
-        return []byte{}, xerrors.NewUIErr(err1.Error(), err1.Error(), `018`, true)
+    var bytes []byte
+    bytes, err = json.Marshal(api_request{`ok`, nil, a })
+    if err != nil {
+        return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `018`, true)
     }
 
     return bytes, nil

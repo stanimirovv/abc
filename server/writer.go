@@ -8,4 +8,5 @@ type Writer interface {
     addThread(boardId int, threadName string) (threads, error)
     isThreadLimitReached(boardId int) (bool, error)
     isPostLimitReached(threadId int) (bool, threads, error)
+    archiveThread(threadId int)
 }

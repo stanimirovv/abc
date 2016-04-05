@@ -126,3 +126,9 @@ func (db *writerrdb) isPostLimitReached(threadId int) (bool, threads, error){
     }
     return isLimitReached, thread, err
 }
+
+func (db *writerrdb) archiveThread(threadId int) {
+    dbh.QueryRow("UPDATE threads set is_active = false where id = $1", threadId).Scan()
+}
+
+
