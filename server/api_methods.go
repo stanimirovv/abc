@@ -53,39 +53,17 @@ func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardId int)  ([]byt
 
 
 func (api *abc_api) getPostsForThread(apiKey string, threadId int)  ([]byte, error) {
-    rows, err := dbh.Query(`select tp.id, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip 
-			    from thread_posts tp join threads t on t.id = tp.thread_id 
-						 join boards b on b.id = t.board_id 
-						 join image_board_clusters ibc on ibc.id = b.image_board_cluster_id 
-			    where tp.thread_id = $1 and ibc.api_key = $2 and t.is_active = true;`, threadId, apiKey)
-    if err != nil {
-	glog.Error(err)
-        return []byte{}, xerrors.NewSysErr()
-    }
-    defer rows.Close()
-
-    var currPosts []thread_posts
-    for rows.Next() {
-	glog.Info("new post for thread with id: ", threadId)
-        var currPost thread_posts
-        err = rows.Scan(&currPost.Id, &currPost.Body, &currPost.AttachmentUrl, &currPost.InsertedAt, &currPost.SourceIp)
-        if err != nil {
-	    glog.Error(err)
-            return []byte{}, xerrors.NewSysErr()
-        }
-        currPosts = append(currPosts, currPost)
-    }
+    currPosts, err := api.wr.getPostsForThread(apiKey, threadId)
 
     var bytes []byte
-    var err1 error
     if(len(currPosts) == 0){
 	errMsg := "No objects returned."
-	bytes, err1 = json.Marshal(api_request{"error", &errMsg, &currPosts})
+	bytes, err = json.Marshal(api_request{"error", &errMsg, &currPosts})
     }else {
-	bytes, err1 = json.Marshal(api_request{"ok", nil, &currPosts})
+	bytes, err = json.Marshal(api_request{"ok", nil, &currPosts})
     }
 
-    if err1 != nil {
+    if err != nil {
         return []byte{}, xerrors.NewSysErr()
     }
 
