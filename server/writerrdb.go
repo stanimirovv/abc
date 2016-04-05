@@ -15,9 +15,11 @@ var dbConnString string
 
 //Relational database implementation for writer interface
 type writerrdb struct {
+    dbh *sql.DB
 }
 
 func (db *writerrdb) getBoards(apiKey string) (currBoards []boards, err error) {
+    glog.Info(" apiKey: ", apiKey)
     rows, err := dbh.Query("select b.id, b.name, b.descr from boards b join image_board_clusters ibc on ibc.id = b.image_board_cluster_id where api_key = $1;", apiKey)
     if err != nil {
 	return currBoards, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
