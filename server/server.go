@@ -47,7 +47,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     values := req.URL.Query()
     command, isPassed := values[`command`]
     if !isPassed {
-	res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'command' is undefined.","Payload":null}`))
+	res.Write([]byte(`{"Status":"error","Msg":"Parameter 'command' is undefined.","Payload":null}`))
 	return
     }
 
@@ -56,7 +56,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     if(command[0] == `getBoards` ) {
 	apiKey, isPassed := values[`api_key`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 	    return
 	}
 	resp, err = api.getBoards(apiKey[0])
@@ -64,12 +64,12 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     } else if(command[0] == `getActiveThreadsForBoard`) {
 	apiKey, isPassed := values[`api_key`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 	    return
 	}
 	boardId, isPassed := values[`board_id`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
 	    return
 	}
 	boardIdInt, err := strconv.Atoi(boardId[0])
@@ -82,12 +82,12 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     } else if(command[0] == `getPostsForThread`) {
 	apiKey, isPassed := values[`api_key`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'api_key' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 	    return
 	}
 	threadId, isPassed := values[`thread_id`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_id' is undefined.","Payload":null}`))
 	    return
 	}
 	threadIdInt, err := strconv.Atoi(threadId[0])
@@ -100,7 +100,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     } else if(command[0] == `addPostToThread`) {
 	threadId, isPassed := values[`thread_id`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
 	    return
 	}
 	threadIdInt, err := strconv.Atoi(threadId[0])
@@ -110,17 +110,17 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	}
 	threadBodyPost, isPassed := values[`thread_body_post`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'thread_body_post' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_body_post' is undefined.","Payload":null}`))
 	    return
 	}
 	attachmentUrl, isPassed := values[`attachment_id`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'attachment_id' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_id' is undefined.","Payload":null}`))
 	    return
 	}
 	clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'clientRemoteAddr' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'clientRemoteAddr' is undefined.","Payload":null}`))
 	    return
 	}
 	resp, err = api.addPostToThread(threadIdInt, threadBodyPost[0], &attachmentUrl[0], clientRemoteAddr[0])
@@ -129,7 +129,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
     } else if(command[0] == `addThread`) {
 	boardId, isPassed := values[`board_id`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'board_id' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
 	    return
 	}
 	boardIdInt, err := strconv.Atoi(boardId[0])
@@ -139,7 +139,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request){
 	}
 	threadName, isPassed := values[`thread_name`]
 	if !isPassed {
-	    res.Write([]byte(`{"Status":"error","Msg":"Paremeter 'thread_name' is undefined.","Payload":null}`))
+	    res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_name' is undefined.","Payload":null}`))
 	    return
 	}
 	resp, err = api.addThread(boardIdInt, threadName[0])
