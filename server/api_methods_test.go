@@ -88,3 +88,46 @@ func TestGetPostsForThreadFail(t *testing.T){
 	t.Fail()
     }
 }
+
+//addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
+func TestAddThreadErrLimit(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addThread(2, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+func TestAddThreadErr(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addThread(1, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+
+func TestAddThreadErrLimitOk(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addThread(3, `a`)
+    if err != nil {
+	t.Fail()
+    }
+}
+
+func TestAddThreadErrLimitUnhandledErr(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addThread(2, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
