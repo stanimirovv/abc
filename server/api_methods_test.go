@@ -131,3 +131,65 @@ func TestAddThreadErrLimitUnhandledErr(t *testing.T){
     }
 }
 
+var str = `a`
+
+//addPostToThread(threadId int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
+func TestAddPostErrLimit(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(2, `a`, &str, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+func TestAddPostErr(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(1, `a`, &str, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+func TestAddPostErrLimitLen(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(3, `a`, &str, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+func TestAddPostErrLimitUnhandledErr(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(2, `a`, &str, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+func TestAddPost1(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(5, `a`, &str, `a`)
+    if err == nil {
+	t.Fail()
+    }
+}
+
+func TestAddPostOk(t *testing.T){
+    var api abc_api
+    wrdb := writermock{}
+    api.wr = &wrdb
+    _, err := api.addPostToThread(3, `aaa`, &str, `a`)
+    if err != nil {
+	t.Fail()
+    }
+}
+
