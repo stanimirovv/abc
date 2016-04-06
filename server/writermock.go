@@ -52,9 +52,9 @@ func (db *writermock) addThread(boardId int, threadName string) (threads, error)
 }
 
 func (db *writermock) isThreadLimitReached(boardId int) (bool, error) {
-    if boardId == 1 {
+    if boardId == 2 {
 	return true, nil
-    } else if boardId == 2 {
+    } else if boardId == 3 {
 	return false, nil
     } else {
 	return false, xerrors.NewUIErr(`test err`, `test err`, `002`, true)
@@ -62,15 +62,11 @@ func (db *writermock) isThreadLimitReached(boardId int) (bool, error) {
 }
 
 func (db *writermock) isPostLimitReached(threadId int) (bool, threads, error) {
-    if threadId == 1 {
+    if threadId == 2 {
 	return true, threads{Id: threadId, Name: `Mock Thread`}, nil
-    } else if threadId == 2 {
-	return false, threads{Id: threadId, Name: `Mock Thread`}, nil
+    } else if threadId == 3 {
+	return false, threads{Id: threadId, Name: `Mock Thread`, MinPostLength: 2, MaxPostLength: 4}, nil
     } else {
 	return false, threads{Id: threadId, Name: `Mock Thread`}, xerrors.NewUIErr(`test err`, `test err`, `002`, true)
     }
-}
-
-func (db *writermock) archiveThread(threadId int) {
-
 }
