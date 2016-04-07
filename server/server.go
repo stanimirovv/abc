@@ -22,7 +22,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var api abc_api
+var api abcAPI
 
 func main() {
 	flag.Parse()
@@ -68,14 +68,14 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 			return
 		}
-		boardID, isPassed := values[`board_id`]
+		boardID, isPassed := values[`board_Id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
 			return
 		}
 		boardIDInt, err := strconv.Atoi(boardID[0])
 		if err != nil {
-			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_Id","Payload":null}`))
 			return
 		}
 		resp, err = api.getActiveThreadsForBoard(apiKey[0], boardIDInt)
@@ -86,27 +86,27 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 			return
 		}
-		threadID, isPassed := values[`thread_id`]
+		threadID, isPassed := values[`thread_Id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_Id' is undefined.","Payload":null}`))
 			return
 		}
 		threadIDInt, err := strconv.Atoi(threadID[0])
 		if err != nil {
-			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_Id","Payload":null}`))
 			return
 		}
 		resp, err = api.getPostsForThread(apiKey[0], threadIDInt)
 
 	} else if command[0] == `addPostToThread` {
-		threadID, isPassed := values[`thread_id`]
+		threadID, isPassed := values[`thread_Id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
 			return
 		}
 		threadIDInt, err := strconv.Atoi(threadID[0])
 		if err != nil {
-			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_Id","Payload":null}`))
 			return
 		}
 		threadBodyPost, isPassed := values[`thread_body_post`]
@@ -114,9 +114,9 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_body_post' is undefined.","Payload":null}`))
 			return
 		}
-		attachmentUrl, isPassed := values[`attachment_id`]
+		attachmentURL, isPassed := values[`attachment_Id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_Id' is undefined.","Payload":null}`))
 			return
 		}
 		clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
@@ -124,17 +124,17 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'clientRemoteAddr' is undefined.","Payload":null}`))
 			return
 		}
-		resp, err = api.addPostToThread(threadIDInt, threadBodyPost[0], &attachmentUrl[0], clientRemoteAddr[0])
+		resp, err = api.addPostToThread(threadIDInt, threadBodyPost[0], &attachmentURL[0], clientRemoteAddr[0])
 
 	} else if command[0] == `addThread` {
-		boardID, isPassed := values[`board_id`]
+		boardID, isPassed := values[`board_Id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
 			return
 		}
 		boardIDInt, err := strconv.Atoi(boardID[0])
 		if err != nil {
-			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_id","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_Id","Payload":null}`))
 			return
 		}
 		threadName, isPassed := values[`thread_name`]

@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetBoardsOk(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getBoards(`ok`)
@@ -15,7 +15,7 @@ func TestGetBoardsOk(t *testing.T) {
 }
 
 func TestGetBoardsErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getBoards(`err`)
@@ -25,7 +25,7 @@ func TestGetBoardsErr(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardOk(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getActiveThreadsForBoard(`ok`, 1)
@@ -35,7 +35,7 @@ func TestGetActiveThreadsForBoardOk(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getActiveThreadsForBoard(`err`, 1)
@@ -45,7 +45,7 @@ func TestGetActiveThreadsForBoardErr(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardEmpty(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getActiveThreadsForBoard(`empty`, 1)
@@ -55,7 +55,7 @@ func TestGetActiveThreadsForBoardEmpty(t *testing.T) {
 }
 
 func TestGetPostsForThreadOk(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getPostsForThread(`ok`, 1)
@@ -65,7 +65,7 @@ func TestGetPostsForThreadOk(t *testing.T) {
 }
 
 func TestGetPostsForThreadEmpty(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getPostsForThread(`empty`, 1)
@@ -75,7 +75,7 @@ func TestGetPostsForThreadEmpty(t *testing.T) {
 }
 
 func TestGetPostsForThreadFail(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.getPostsForThread(`err`, 1)
@@ -86,7 +86,7 @@ func TestGetPostsForThreadFail(t *testing.T) {
 
 //addPostToThread(threadID int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
 func TestAddThreadErrLimit(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addThread(2, `a`)
@@ -96,7 +96,7 @@ func TestAddThreadErrLimit(t *testing.T) {
 }
 
 func TestAddThreadErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addThread(1, `a`)
@@ -106,7 +106,7 @@ func TestAddThreadErr(t *testing.T) {
 }
 
 func TestAddThreadErrLimitOk(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addThread(3, `a`)
@@ -116,7 +116,7 @@ func TestAddThreadErrLimitOk(t *testing.T) {
 }
 
 func TestAddThreadErrLimitUnhandledErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addThread(2, `a`)
@@ -129,7 +129,7 @@ var str = `a`
 
 //addPostToThread(threadID int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
 func TestAddPostErrLimit(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(2, `a`, &str, `a`)
@@ -139,7 +139,7 @@ func TestAddPostErrLimit(t *testing.T) {
 }
 
 func TestAddPostErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(1, `a`, &str, `a`)
@@ -149,7 +149,7 @@ func TestAddPostErr(t *testing.T) {
 }
 
 func TestAddPostErrLimitLen(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(3, `a`, &str, `a`)
@@ -158,7 +158,7 @@ func TestAddPostErrLimitLen(t *testing.T) {
 	}
 }
 func TestAddPostErrLimitUnhandledErr(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(2, `a`, &str, `a`)
@@ -168,7 +168,7 @@ func TestAddPostErrLimitUnhandledErr(t *testing.T) {
 }
 
 func TestAddPost1(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(5, `a`, &str, `a`)
@@ -178,7 +178,7 @@ func TestAddPost1(t *testing.T) {
 }
 
 func TestAddPostOk(t *testing.T) {
-	var api abc_api
+	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
 	_, err := api.addPostToThread(3, `aaa`, &str, `a`)

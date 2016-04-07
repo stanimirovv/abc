@@ -12,25 +12,25 @@ import (
 	"github.com/iambc/xerrors"
 )
 
-type abc_api struct {
-	storage_type string
-	wr           Writer
+type abcAPI struct {
+	storageType string
+	wr          Writer
 }
 
-func (api *abc_api) getBoards(apiKey string) ([]byte, error) {
+func (api *abcAPI) getBoards(apiKey string) ([]byte, error) {
 
 	currBoards, err := api.wr.getBoards(apiKey)
 	if err != nil {
 		return []byte{}, err
 	}
-	bytes, err := json.Marshal(api_request{"ok", nil, &currBoards})
+	bytes, err := json.Marshal(apiRequest{"ok", nil, &currBoards})
 	if err != nil {
 		return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `004`, true)
 	}
 	return bytes, nil
 }
 
-func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardID int) ([]byte, error) {
+func (api *abcAPI) getActiveThreadsForBoard(apiKey string, boardID int) ([]byte, error) {
 
 	activeThreads, err := api.wr.getActiveThreadsForBoard(apiKey, boardID)
 	if err != nil {
@@ -39,9 +39,9 @@ func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardID int) ([]byte
 	var bytes []byte
 	if len(activeThreads) == 0 {
 		errMsg := "No objects returned."
-		bytes, err = json.Marshal(api_request{"error", &errMsg, &activeThreads})
+		bytes, err = json.Marshal(apiRequest{"error", &errMsg, &activeThreads})
 	} else {
-		bytes, err = json.Marshal(api_request{"ok", nil, &activeThreads})
+		bytes, err = json.Marshal(apiRequest{"ok", nil, &activeThreads})
 	}
 
 	if err != nil {
@@ -51,15 +51,15 @@ func (api *abc_api) getActiveThreadsForBoard(apiKey string, boardID int) ([]byte
 	return bytes, nil
 }
 
-func (api *abc_api) getPostsForThread(apiKey string, threadID int) ([]byte, error) {
+func (api *abcAPI) getPostsForThread(apiKey string, threadID int) ([]byte, error) {
 	currPosts, err := api.wr.getPostsForThread(apiKey, threadID)
 
 	var bytes []byte
 	if len(currPosts) == 0 {
 		errMsg := "No objects returned."
-		bytes, err = json.Marshal(api_request{"error", &errMsg, &currPosts})
+		bytes, err = json.Marshal(apiRequest{"error", &errMsg, &currPosts})
 	} else {
-		bytes, err = json.Marshal(api_request{"ok", nil, &currPosts})
+		bytes, err = json.Marshal(apiRequest{"ok", nil, &currPosts})
 	}
 
 	if err != nil {
@@ -69,7 +69,7 @@ func (api *abc_api) getPostsForThread(apiKey string, threadID int) ([]byte, erro
 	return bytes, nil
 }
 
-func (api *abc_api) addPostToThread(threadID int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string) ([]byte, error) {
+func (api *abcAPI) addPostToThread(threadID int, threadBodyPost string, attachmentURL *string, clientRemoteAddr string) ([]byte, error) {
 	isLimitReached, thr, err := api.wr.isPostLimitReached(threadID)
 
 	if err != nil {
@@ -88,7 +88,7 @@ func (api *abc_api) addPostToThread(threadID int, threadBodyPost string, attachm
 		return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: `+strconv.Itoa(len(threadBodyPost))+` max length: `+strconv.Itoa(thr.MaxPostLength), `021`, false)
 	}
 
-	err = api.wr.addPostToThread(threadID, threadBodyPost, attachmentUrl, clientRemoteAddr)
+	err = api.wr.addPostToThread(threadID, threadBodyPost, attachmentURL, clientRemoteAddr)
 
 	if err != nil {
 		glog.Error(err)
@@ -96,7 +96,7 @@ func (api *abc_api) addPostToThread(threadID int, threadBodyPost string, attachm
 	}
 
 	var bytes []byte
-	bytes, err = json.Marshal(api_request{"ok", nil, nil})
+	bytes, err = json.Marshal(apiRequest{"ok", nil, nil})
 	if err != nil {
 		return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `012`, true)
 	}
@@ -104,7 +104,7 @@ func (api *abc_api) addPostToThread(threadID int, threadBodyPost string, attachm
 	return bytes, nil
 }
 
-func (api *abc_api) addThread(boardID int, threadName string) ([]byte, error) {
+func (api *abcAPI) addThread(boardID int, threadName string) ([]byte, error) {
 
 	isLimitReached, err := api.wr.isThreadLimitReached(boardID)
 
@@ -123,14 +123,14 @@ func (api *abc_api) addThread(boardID int, threadName string) ([]byte, error) {
 	}
 
 	a := struct {
-		Id   int
+		ID   int
 		Name string
 	}{
-		thr.Id,
+		thr.ID,
 		thr.Name,
 	}
 	var bytes []byte
-	bytes, err = json.Marshal(api_request{`ok`, nil, a})
+	bytes, err = json.Marshal(apiRequest{`ok`, nil, a})
 	if err != nil {
 		return []byte{}, xerrors.NewUIErr(err.Error(), err.Error(), `018`, true)
 	}
