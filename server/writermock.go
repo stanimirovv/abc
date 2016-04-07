@@ -70,3 +70,5 @@ func (db *writermock) isPostLimitReached(threadId int) (bool, threads, error) {
 	return false, threads{Id: threadId, Name: `Mock Thread`}, xerrors.NewUIErr(`test err`, `test err`, `002`, true)
     }
 }
+
+func (db *writermock) archiveThread(threadId int){}
