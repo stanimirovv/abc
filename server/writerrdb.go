@@ -19,7 +19,7 @@ type writerrdb struct {
 
 func (db *writerrdb) getBoards(apiKey string) (currBoards []boards, err error) {
 	glog.Info(" apiKey: ", apiKey)
-	rows, err := dbh.Query("select b.ID, b.name, b.descr from boards b join imageBoardClusters ibc on ibc.ID = b.image_board_cluster_ID where api_key = $1;", apiKey)
+	rows, err := dbh.Query("select b.ID, b.name, b.descr from boards b join image_board_clusters ibc on ibc.ID = b.image_board_cluster_ID where api_key = $1;", apiKey)
 	if err != nil {
 		return currBoards, xerrors.NewUIErr(err.Error(), err.Error(), `002`, true)
 	}
@@ -37,10 +37,10 @@ func (db *writerrdb) getBoards(apiKey string) (currBoards []boards, err error) {
 }
 
 func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardID int) (activeThreads []threads, err error) {
-	rows, err := dbh.Query(`select t.ID, t.name, count(*), (select count(*) from threadPosts where thread_ID = t.ID and attachment_url is not null) from threads t
+	rows, err := dbh.Query(`select t.ID, t.name, count(*), (select count(*) from thread_posts where thread_ID = t.ID and attachment_url is not null) from threads t
 				join boards b on b.ID = t.board_ID
-				join imageBoardClusters ibc on ibc.ID = b.image_board_cluster_ID
-				left join threadPosts tp on tp.thread_ID = t.ID
+				join image_board_clusters ibc on ibc.ID = b.image_board_cluster_ID
+				left join thread_bosts tp on tp.thread_ID = t.ID
 			    where t.is_active = TRUE and t.board_ID = $1 and ibc.api_key = $2 group by 1,2 order by t.ID;`, boardID, apiKey)
 	if err != nil {
 		return activeThreads, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
@@ -61,9 +61,9 @@ func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardID int) (activ
 
 func (db *writerrdb) getPostsForThread(apiKey string, threadID int) (currPosts []threadPosts, err error) {
 	rows, err := dbh.Query(`select tp.ID, tp.body, tp.attachment_url, tp.inserted_at, tp.source_ip
-			    from threadPosts tp join threads t on t.ID = tp.thread_ID
+			    from thread_posts tp join threads t on t.ID = tp.thread_ID
 						 join boards b on b.ID = t.board_ID
-						 join imageBoardClusters ibc on ibc.ID = b.image_board_cluster_ID
+						 join image_board_clusters ibc on ibc.ID = b.image_board_cluster_ID
 			    where tp.thread_ID = $1 and ibc.api_key = $2 and t.is_active = true;`, threadID, apiKey)
 	if err != nil {
 		glog.Error(err)
@@ -85,7 +85,7 @@ func (db *writerrdb) getPostsForThread(apiKey string, threadID int) (currPosts [
 }
 
 func (db *writerrdb) addPostToThread(threadID int, threadBodyPost string, attachmentURL *string, clientRemoteAddr string) (err error) {
-	_, err = dbh.Query("INSERT INTO threadPosts(body, thread_ID, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadID, attachmentURL, clientRemoteAddr)
+	_, err = dbh.Query("INSERT INTO thread_posts(body, thread_ID, attachment_url, source_ip) VALUES($1, $2, $3, $4)", threadBodyPost, threadID, attachmentURL, clientRemoteAddr)
 
 	if err != nil {
 		glog.Error(err)
@@ -120,7 +120,7 @@ func (db *writerrdb) isThreadLimitReached(boardID int) (bool, error) {
 func (db *writerrdb) isPostLimitReached(threadID int) (bool, threads, error) {
 	var isLimitReached bool
 	var thread threads
-	err := dbh.QueryRow("select (select count(*) from threadPosts  where thread_ID = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where ID = $1;", threadID).Scan(&isLimitReached, &thread.MinPostLength, &thread.MaxPostLength)
+	err := dbh.QueryRow("select (select count(*) from thread_posts  where thread_ID = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where ID = $1;", threadID).Scan(&isLimitReached, &thread.MinPostLength, &thread.MaxPostLength)
 	if err != nil {
 		return true, thread, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
 	}
