@@ -26,21 +26,23 @@ var api abcAPI
 
 func main() {
 	flag.Parse()
-	var err error
-	dbConnString = os.Getenv("ABC_DB_CONN_STRING")
-	dbh, err = sql.Open("postgres", dbConnString)
+	var (
+		dbConnString       = os.Getenv("ABC_DB_CONN_STRING")
+		filesServerAddr    = os.Getenv("ABC_FILES_SERVER_URL")
+		filesDir           = os.Getenv("ABC_FILES_DIR")
+		serverEndpointAddr = os.Getenv("ABC_SERVER_ENDPOINT_URL")
+	)
+
+	db, err := sql.Open("postgres", dbConnString)
 	if err != nil {
 		glog.Fatal("Connection to the database has failed")
 	}
 
-	wrdb := writerrdb{dbh}
-	api.wr = &wrdb
+	api.wr = &writerrdb{db}
 
-	dbConnString = os.Getenv("ABC_DB_CONN_STRING")
-
-	go http.ListenAndServe(":"+os.Getenv("ABC_FILES_SERVER_URL"), http.FileServer(http.Dir(os.Getenv("ABC_FILES_DIR"))))
+	go http.ListenAndServe(":"+filesServerAddr, http.FileServer(http.Dir(filesDir)))
 	http.HandleFunc("/api", QueryStringHandler)
-	http.ListenAndServe(`:`+os.Getenv("ABC_SERVER_ENDPOINT_URL"), nil)
+	http.ListenAndServe(`:`+serverEndpointAddr, nil)
 }
 
 func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
