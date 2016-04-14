@@ -37,7 +37,7 @@ func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardID int) (activ
 	rows, err := db.Query(`select t.ID, t.name, count(*), (select count(*) from thread_posts where thread_ID = t.ID and attachment_url is not null) from threads t
 				join boards b on b.ID = t.board_ID
 				join image_board_clusters ibc on ibc.ID = b.image_board_cluster_ID
-				left join thread_bosts tp on tp.thread_ID = t.ID
+				left join thread_posts tp on tp.thread_ID = t.ID
 			    where t.is_active = TRUE and t.board_ID = $1 and ibc.api_key = $2 group by 1,2 order by t.ID;`, boardID, apiKey)
 	if err != nil {
 		return activeThreads, xerrors.NewUIErr(err.Error(), err.Error(), `006`, true)
@@ -45,7 +45,6 @@ func (db *writerrdb) getActiveThreadsForBoard(apiKey string, boardID int) (activ
 	defer rows.Close()
 
 	for rows.Next() {
-		glog.Info("Popped new thread")
 		var thread threads
 		err = rows.Scan(&thread.ID, &thread.Name, &thread.PostCount, &thread.PostCountWithAttachment)
 		if err != nil {
