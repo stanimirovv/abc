@@ -7,56 +7,40 @@
         path = location.hash.split('/');
         console.log("Path: ", path);
         if(path.length === 1) {
-            app.getBoards();
+            getBoards();
         } else if(path.length === 2) {
             board = path[1].split(':');
 
             if( board.length !== 2){
-                app.uiError('Bad path!');
+                uiError('Bad path!');
             } else {
-                app.getActiveThreadsForBoard(board[1]);
+                getActiveThreadsForBoard(board[1]);
             }
         } else if (path.length === 3) {
             board = path[1].split(':');
 
             if( board.length !== 2){
-                app.uiError('Bad path!');
+                uiError('Bad path!');
                 return
             } else {
-                app.getActiveThreadsForBoard(board[1]);
+                getActiveThreadsForBoard(board[1]);
             }
 
             thread = path[1].split[':'];
             if( params.length !== 2){
-                app.uiError('Bad path!');
+                uiError('Bad path!');
             } else {
-                app.getPostsForThread(board[1] ,thread[1]);
+                getPostsForThread(board[1] ,thread[1]);
             }
         } else {
             console.log("Unknown path!");
         }
-/*
-        if (location.hash === "#boards") {
-            obj.getBoards();
-        }
-        else if (location.hash.indexOf("#thread:") > -1 ){
-            obj.getPostsForThread(location.hash.split(":")[2]);
-        }
-        else if (location.hash.indexOf("#board:") > -1 ){
-            obj.showThreadsForBoard(location.hash.split(":")[1]);
-        }
-        else if (location.hash.indexOf("#new_thread:") > -1 ){
-            obj.loadNewThreadTemplate(location.hash.split(":")[1]);
-        }
-        else{
-            document.getElementById("app").innerHTML = "404 page not found";
-        }
-*/
     }
     window.onhashchange = locationHashChanged;
-var app = {
+    window.onload = locationHashChanged;
 
-getTestPromise : function(){
+
+ function getTestPromise(){
     new Promise(function(resolve, reject) {
     $.ajax({
               url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
@@ -68,32 +52,57 @@ getTestPromise : function(){
 })
 .then(function(e) { console.log('done', e); })
 .catch(function(e) { console.log('catch: ', e); });
-},
+}
 
-getBoards : function(){
-        $.ajax({    url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
-              type: "GET",
-              success: function(){},
+function getBoards(){
+    console.log("Inside getBoards");
+        $.ajax({
+                url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
+                type: "GET",
+                success: function(resp){
+                    respObj = JSON.parse(resp);
+                    if( respObj.Status !== 'ok') {
+                        uiError(resp.Msg);
+                    }
+
+                    var html = '';
+                    for (var i = 0; i < respObj.Payload.length; i++){
+                        console.log(respObj.Payload[i]);
+                        html += '<h2>'+ respObj.Payload[i].Name +'</h2>';
+                    }
+                $("#app").html(html);
+              },
               error: function(){}
           });
-},
+}
 
 
-uiError : function(errorText){
+function uiError(errorText){
     alert(errorText);
-},
+}
 
-getActiveThreadsForBoard : function(boardId){
+function getActiveThreadsForBoard(boardId){
     console.log(boardId);
     $.ajax({
           url: "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId,
           type: "GET",
-          success: function(){},
+          success: function(resp){
+              respObj = JSON.parse(resp);
+              if( respObj.Status !== 'ok') {
+                  alert(resp.Msg);
+              }
+
+              var html = '';
+              for (var i = 0; i < respObj.Payload.length; i++){
+                  console.log(respObj.Payload[i]);
+                  html += '<h2>'+ respObj.Payload[i].Name +'</h2>';
+              }
+              $("#app").html(html);
+          },
           error: function(){}
       });
 }
 
-}
 //xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b");
 //xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getPostsForThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId);
 //xmlhttp.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
