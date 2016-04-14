@@ -70,7 +70,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 			return
 		}
-		boardID, isPassed := values[`board_Id`]
+		boardID, isPassed := values[`board_id`]
 		if !isPassed {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
 			return
