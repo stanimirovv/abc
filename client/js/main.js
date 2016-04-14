@@ -22,8 +22,6 @@
             if( board.length !== 2){
                 uiError('Bad path!');
                 return
-            } else {
-                getActiveThreadsForBoard(board[1]);
             }
 
             thread = path[1].split[':'];
@@ -39,7 +37,7 @@
     window.onhashchange = locationHashChanged;
     window.onload = locationHashChanged;
 
-
+ boards = {}
  function getTestPromise(){
     new Promise(function(resolve, reject) {
     $.ajax({
@@ -60,15 +58,15 @@ function getBoards(){
                 url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
                 type: "GET",
                 success: function(resp){
-                    respObj = JSON.parse(resp);
-                    if( respObj.Status !== 'ok') {
+                    boards = JSON.parse(resp);
+                    if( boards.Status !== 'ok') {
                         uiError(resp.Msg);
                     }
 
                     var html = '';
-                    for (var i = 0; i < respObj.Payload.length; i++){
-                        console.log(respObj.Payload[i]);
-                        html += '<h2>'+ respObj.Payload[i].Name +'</h2>';
+                    for (var i = 0; i < boards.Payload.length; i++){
+                        console.log(boards.Payload[i]);
+                        html += '<h2>'+ boards.Payload[i].Name +'</h2>';
                     }
                 $("#app").html(html);
               },
@@ -82,7 +80,22 @@ function uiError(errorText){
 }
 
 function getActiveThreadsForBoard(boardId){
+    console.log("boards: ", boards);
     console.log(boardId);
+    if(boards.Status === undefined){
+        console.log('MUST LOAD CACHE');
+        new Promise(function(resolve, reject) {
+            getBoards()
+            resolve('ok');
+        })
+        .then(function(e) { getActiveThreadsForBoardA(boardId) })
+        .catch(function(e) { console.log('catch: ', e); });
+    }
+
+}
+
+function getActiveThreadsForBoardA(boardId){
+
     $.ajax({
           url: "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId,
           type: "GET",
@@ -93,6 +106,11 @@ function getActiveThreadsForBoard(boardId){
               }
 
               var html = '';
+              for(var i = 0; i < boards.Payload.length; i++){
+                  if(boards.Payload[i].ID == boardId){
+                      html += '<h1>' + boards.Payload[i].Name +'</h1>';
+                  }
+              }
               for (var i = 0; i < respObj.Payload.length; i++){
                   console.log(respObj.Payload[i]);
                   html += '<h2>'+ respObj.Payload[i].Name +'</h2>';
@@ -103,7 +121,24 @@ function getActiveThreadsForBoard(boardId){
       });
 }
 
-//xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b");
+function getPostsForThread(boardId, threadId){
+    console.log(boardId);
+    if(boards.Status === undefined){
+        console.log('MUST LOAD CACHE');
+        new Promise(function(resolve, reject) {
+            getBoards()
+            resolve('ok');
+        })
+        .then(function(e) { getActiveThreadsForBoardA(boardId) })
+        .catch(function(e) { console.log('catch: ', e); });
+    }
+}
+
+function getPostsForThreadA(boardId, threadId){
+
+
+}
+
 //xmlhttp.open("GET", "http://127.0.0.1:8089/api?command=getPostsForThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId);
 //xmlhttp.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
                         //"&thread_post_body=" + escape(document.getElementById('newPostTextArea').value) + "&attachment_url="+escape(attachmentUrl));
