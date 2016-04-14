@@ -126,12 +126,38 @@ function getPostsForThread(boardId, threadId){
     console.log(boardId);
     if(boards.Status === undefined){
         console.log('MUST LOAD CACHE');
+/*
         new Promise(function(resolve, reject) {
             getBoards()
             resolve('ok');
         })
         .then(function(e) { getActiveThreadsForBoardA(boardId) }, function(e) { console.log('catch: ', e); })
         .then(function(e){getPostsForThreadA(boardId, threadId)}, function(e) {console.log('catch: ', e); });
+*/
+new Promise(function(resolve, reject) {
+    $.ajax({
+            url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
+            type: "GET",
+            success: function(resp){
+                boards = JSON.parse(resp);
+                if( boards.Status !== 'ok') {
+                    uiError(resp.Msg);
+                }
+
+                var html = '';
+                for (var i = 0; i < boards.Payload.length; i++){
+                    console.log(boards.Payload[i]);
+                    html += '<h2>'+ boards.Payload[i].Name +'</h2>';
+                }
+            $("#app").html(html);
+            resolve('ok');
+          },
+          error: function(){}
+      });
+
+})
+.then(function(e) { getActiveThreadsForBoardA(boardId); resolve(1) }, function(e) { console.log('catch: ', e); })
+.then(function(e){getPostsForThreadA(boardId, threadId); resolve(1)}, function(e) {console.log('catch: ', e); });
     }
 
 }
@@ -148,14 +174,15 @@ function getPostsForThreadA(boardId, threadId){
                         }
 
                         var html = '';
-                        for (var i = 0; i < threads.Payload.length; i++){
-                            console.log(threads.Payload[i]);
-                            html += '<h2>'+ threads.Payload[i].Name +'</h2>';
-                        }
+                        /*for (var i = 0; i < threads.Payload.length; i++){
+                            if(i == threads.Payload[i].ID){
+                                html += '<h2>'+ threads.Payload[i].Name +'</h2>';
+                            }
+                        }*/
                         for(var i =0; i < respObj.Payload.length; i++){
                             html += '<div>' + respObj.Payload[i].Body + '</div>';
                         }
-                        console.log(respObj);
+                        $("#app").html('asd');
                     },
               error: function(){reject("ERROR!");}
           });
