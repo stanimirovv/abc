@@ -88,9 +88,9 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 			return
 		}
-		threadID, isPassed := values[`thread_Id`]
+		threadID, isPassed := values[`thread_id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_Id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_id' is undefined.","Payload":null}`))
 			return
 		}
 		threadIDInt, err := strconv.Atoi(threadID[0])
@@ -101,9 +101,9 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 		resp, err = api.getPostsForThread(apiKey[0], threadIDInt)
 
 	} else if command[0] == `addPostToThread` {
-		threadID, isPassed := values[`thread_Id`]
+		threadID, isPassed := values[`thread_id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_id' is undefined.","Payload":null}`))
 			return
 		}
 		threadIDInt, err := strconv.Atoi(threadID[0])
@@ -116,9 +116,9 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_body_post' is undefined.","Payload":null}`))
 			return
 		}
-		attachmentURL, isPassed := values[`attachment_Id`]
+		attachmentURL, isPassed := values[`attachment_id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_Id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_id' is undefined.","Payload":null}`))
 			return
 		}
 		clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
@@ -129,9 +129,9 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 		resp, err = api.addPostToThread(threadIDInt, threadBodyPost[0], &attachmentURL[0], clientRemoteAddr[0])
 
 	} else if command[0] == `addThread` {
-		boardID, isPassed := values[`board_Id`]
+		boardID, isPassed := values[`board_id`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_Id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
 			return
 		}
 		boardIDInt, err := strconv.Atoi(boardID[0])
