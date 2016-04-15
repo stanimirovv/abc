@@ -115,7 +115,7 @@ func (db *writerrdb) isThreadLimitReached(boardID int) (bool, error) {
 func (db *writerrdb) isPostLimitReached(threadID int) (bool, threads, error) {
 	var isLimitReached bool
 	var thread threads
-	err := db.QueryRow("select (select count(*) from thread_posts  where thread_ID = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where ID = $1;", threadID).Scan(&isLimitReached, &thread.MinPostLength, &thread.MaxPostLength)
+	err := db.QueryRow("select (select count(*) from thread_posts  where thread_id = $1) > max_posts_per_thread, min_post_length, max_post_length  from threads where id = $1;", threadID).Scan(&isLimitReached, &thread.MinPostLength, &thread.MaxPostLength)
 	if err != nil {
 		return true, thread, xerrors.NewUIErr(err.Error(), err.Error(), `009`, true)
 	}
