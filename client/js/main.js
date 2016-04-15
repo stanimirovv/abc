@@ -115,7 +115,7 @@ function getActiveThreadsForBoardA(boardId, resolve){
               if( threads.Status !== 'ok') {
                   alert(resp.Msg);
               }
-              var html = '';
+              var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newThreadPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="obj.submitNewThread()" value="Submit Thread!"  />';
               for(var i = 0; i < boards.Payload.length; i++){
                   if(boards.Payload[i].ID == boardId){
                       html += '<h1>' + boards.Payload[i].Name +'</h1>';
@@ -162,7 +162,7 @@ function getPostsForThreadA(boardId, threadId){
                             alert(resp.Msg);
                         }
 
-                        var html = '';
+                        var html = '</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="obj.submitNewPost()" value="Submit post!"  /> ';
                         console.log("inside getPostsForThreadA: threads: ", threads);
                         for (var i = 0; i < threads.Payload.length; i++){
                             if(threadId == threads.Payload[i].ID){
