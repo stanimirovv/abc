@@ -76,7 +76,6 @@ func (api *abcAPI) addPostToThread(threadID int, threadBodyPost string, attachme
 	if err != nil {
 		return []byte{}, err
 	}
-
 	if isLimitReached {
 		api.wr.archiveThread(threadID)
 		return []byte{}, xerrors.NewUIErr(`Thread post limit reached!`, `Thread post limit reached!`, `010`, true)
@@ -85,6 +84,7 @@ func (api *abcAPI) addPostToThread(threadID int, threadBodyPost string, attachme
 	if thr.MinPostLength > len(threadBodyPost) && thr.MinPostLength != -1 {
 		return []byte{}, xerrors.NewUIErr(`Post length is less than minimum length!`, `Post length is less than minimum length! post length: `+strconv.Itoa(len(threadBodyPost))+` min length: `+strconv.Itoa(thr.MinPostLength), `020`, false)
 	}
+
 	if thr.MaxPostLength < len(threadBodyPost) && thr.MaxPostLength != -1 {
 		return []byte{}, xerrors.NewUIErr(`Post length is more than maximum length!`, `Post length is more than maximum length! post length: `+strconv.Itoa(len(threadBodyPost))+` max length: `+strconv.Itoa(thr.MaxPostLength), `021`, false)
 	}
