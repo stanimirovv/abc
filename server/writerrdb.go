@@ -68,7 +68,6 @@ func (db *writerrdb) getPostsForThread(apiKey string, threadID int) (currPosts [
 	defer rows.Close()
 
 	for rows.Next() {
-		glog.Info("new post for thread with ID: ", threadID)
 		var currPost threadPosts
 		err = rows.Scan(&currPost.ID, &currPost.Body, &currPost.attachmentURL, &currPost.InsertedAt, &currPost.SourceIP)
 		if err != nil {

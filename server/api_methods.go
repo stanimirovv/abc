@@ -57,7 +57,8 @@ func (api *abcAPI) getPostsForThread(apiKey string, threadID int) ([]byte, error
 	var bytes []byte
 	if len(currPosts) == 0 {
 		errMsg := "No objects returned."
-		bytes, err = json.Marshal(apiRequest{"error", &errMsg, &currPosts})
+		var tmp []int
+		bytes, err = json.Marshal(apiRequest{"ok", &errMsg, &tmp})
 	} else {
 		bytes, err = json.Marshal(apiRequest{"ok", nil, &currPosts})
 	}
