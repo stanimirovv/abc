@@ -54,7 +54,7 @@
 
 })
 .then(function(e) { console.log('done', e); })
-.catch(function(e) { console.log('catch: ', e); });
+.catch(function(e) { uiError('Error: ', e); });
 }
 
 function getBoards(resolve){
@@ -98,7 +98,7 @@ function getActiveThreadsForBoardChain(boardId){
             resolve('ok');
         })
         .then(function(e) { getActiveThreadsForBoard(boardId) },
-                function(e) { console.log('catch: ', e); });
+                function(e) { uiError('Error: ', e); });
     } else {
         getActiveThreadsForBoard(boardId);
     }
@@ -142,8 +142,8 @@ function getPostsForThreadChain(boardId, threadId){
 
         new Promise(function(resolve, reject) {
             getBoards(resolve);})
-            .then(function(e) { return new Promise(function(resolve) {getActiveThreadsForBoard(boardId, resolve);})}, function(e) { console.log('catch: ', e); })
-        .then(function(e){getPostsForThread(boardId, threadId);}, function(e) {console.log('catch: ', e); })
+            .then(function(e) { return new Promise(function(resolve) {getActiveThreadsForBoard(boardId, resolve);})}, function(e) { uiError('catch: ', e); })
+        .then(function(e){getPostsForThread(boardId, threadId);}, function(e) {uiError('catch: ', e); })
     } else {
         getPostsForThread(boardId, threadId);
     }
@@ -182,7 +182,7 @@ function getPostsForThread(boardId, threadId, resolve){
                         console.log("getPostsForThread: Updating the html");
                         $("#app").html(html);
                     },
-              error: function(){reject("ERROR!");}
+              error: function(){uiError("ERROR!");}
           });
 }
 
@@ -209,7 +209,7 @@ function submitNewThreadChain(){
 
                   }).then(function(resolved){window.location.hash += '/t:' + respObj.Payload.ID.toString()});
               },
-              error: function(){console.log("Error in submitNewThread");}
+              error: function(){uiError("Error in submitNewThread");}
           });
 }
 
@@ -233,7 +233,7 @@ function submitNewPostChain(){
     new Promise(function(resolve, reject) {
         submitNewPost(thread[1], resolve);
 
-    }).then(function(resolved){getPostsForThread(board[1], thread[1])});
+    }).then(function(resolved){getPostsForThread(board[1], thread[1])}, function(reject){uiError(reject)});
 
 }
 
@@ -252,6 +252,6 @@ function submitNewPost(threadId, resolve){
                     }
                     console.log("submitNewPost end");
                 },
-              error: function(){console.log("Error in submitNewThread");}
+              error: function(){uiError("Error! Please try again!");}
           });
 }
