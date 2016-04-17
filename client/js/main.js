@@ -58,7 +58,7 @@ function getBoards(resolve){
                     var html = '';
                     for (var i = 0; i < boards.Payload.length; i++){
                         console.log(boards.Payload[i]);
-                        html += '<h2>'+ boards.Payload[i].Name +'</h2>';
+                        html += '<a href="#s/board:' +  boards.Payload[i].ID +'">'+ boards.Payload[i].Name +'</a><br/>';
                     }
                 if(resolve !== undefined){
                     resolve();
@@ -109,7 +109,7 @@ function getActiveThreadsForBoard(boardId, resolve){
                   }
               }
               for (var i = 0; i < threads.Payload.length; i++){
-                  html += '<h2>'+ threads.Payload[i].Name +'</h2>';
+                  html += '<a href="'+ window.location.hash + '/thread:' + threads.Payload[i].ID +'" class="thread">'+ threads.Payload[i].Name +'</a><br/>';
               }
               $("#app").html(html);
               if(resolve !== undefined){
