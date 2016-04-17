@@ -111,23 +111,25 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"Status":"error","Msg":"Wrong value for parameter board_Id","Payload":null}`))
 			return
 		}
-		threadBodyPost, isPassed := values[`thread_body_post`]
+		threadBodyPost, isPassed := values[`thread_post_body`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_body_post' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'thread_post_body' is undefined.","Payload":null}`))
 			return
 		}
-		attachmentURL, isPassed := values[`attachment_id`]
+		attachmentURL, isPassed := values[`attachment_url`]
 		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_id' is undefined.","Payload":null}`))
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'attachment_url' is undefined.","Payload":null}`))
 			return
 		}
-		clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
-		if !isPassed {
-			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'clientRemoteAddr' is undefined.","Payload":null}`))
-			return
-		}
-		resp, err = api.addPostToThread(threadIDInt, threadBodyPost[0], &attachmentURL[0], clientRemoteAddr[0])
 
+		/*
+			clientRemoteAddr, isPassed := values[`clientRemoteAddr`]
+			if !isPassed {
+				res.Write([]byte(`{"Status":"error","Msg":"Parameter 'clientRemoteAddr' is undefined.","Payload":null}`))
+				return
+			}
+		*/
+		resp, err = api.addPostToThread(threadIDInt, threadBodyPost[0], &attachmentURL[0], "127.0.0.1")
 	} else if command[0] == `addThread` {
 		boardID, isPassed := values[`board_id`]
 		if !isPassed {
@@ -161,5 +163,4 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	res.Write(resp)
-
 }
