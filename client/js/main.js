@@ -72,7 +72,9 @@ function getBoards(resolve){
 
 
 function uiError(errorText){
-    alert(errorText);
+    //alert(errorText);
+    $("#notifications").html('<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error:  </strong>'
+       + errorText +'</div>');
 }
 
 function getActiveThreadsForBoardChain(boardId){
