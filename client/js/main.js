@@ -43,19 +43,6 @@
 
  boards = {}
  threads = {}
- function getTestPromise(){
-    new Promise(function(resolve, reject) {
-    $.ajax({
-              url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
-              type: "GET",
-              success: function(){resolve({status: "ok"});},
-              error: function(){reject("ERROR!");}
-          });
-
-})
-.then(function(e) { console.log('done', e); })
-.catch(function(e) { uiError('Error: ', e); });
-}
 
 function getBoards(resolve){
     console.log("Inside getBoards");
