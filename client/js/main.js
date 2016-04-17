@@ -100,7 +100,7 @@ function getActiveThreadsForBoardChain(boardId){
         .then(function(e) { getActiveThreadsForBoard(boardId) },
                 function(e) { console.log('catch: ', e); });
     } else {
-        getActiveThreadsForBoardgetActiveThreadsForBoard(boardId);
+        getActiveThreadsForBoard(boardId);
     }
 
 }
@@ -115,7 +115,7 @@ function getActiveThreadsForBoard(boardId, resolve){
               if( threads.Status !== 'ok') {
                   alert(resp.Msg);
               }
-              var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newThreadPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="obj.submitNewThread()" value="Submit Thread!"  />';
+              var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newThreadPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="submitNewThreadChain()" value="Submit Thread!"  />';
               for(var i = 0; i < boards.Payload.length; i++){
                   if(boards.Payload[i].ID == boardId){
                       html += '<h1>' + boards.Payload[i].Name +'</h1>';
@@ -162,7 +162,7 @@ function getPostsForThread(boardId, threadId){
                             alert(resp.Msg);
                         }
 
-                        var html = '</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="obj.submitNewPost()" value="Submit post!"  /> ';
+                        var html = '</h2><p>Post body:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post attachment URL:</p><input id="newPostAttachUrlInp" type="text" /><input class="btn btn-primary" type="button" onclick="submitNewPostChain()" value="Submit post!"  /> ';
                         console.log("inside getPostsForThreadA: threads: ", threads);
                         for (var i = 0; i < threads.Payload.length; i++){
                             if(threadId == threads.Payload[i].ID){
@@ -181,7 +181,69 @@ function getPostsForThread(boardId, threadId){
           });
 }
 
+function submitNewThreadChain(){
+    console.log(arguments.callee.name);
 
+    var path = location.hash.split('/');
+    var board = path[1].split(':');
+
+    if( board.length !== 2){
+        uiError('Bad path!');
+        return;
+    }
+    var boardId = board[1];
+    $.ajax({
+              url: "http://localhost:8089/api?command=addThread&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId + "&thread_name="
+                + escape(document.getElementById('newThreadTextArea').value) ,
+              type: "GET",
+              success: function(resp){
+                  respObj = JSON.parse(resp);
+                  getPostsForThread(boardId, respObj.Payload.ID);
+              },
+              error: function(){console.log("Error in submitNewThread");}
+          });
+}
+
+function submitNewPostChain(){
+    console.log(arguments.callee.name);
+
+    var path = location.hash.split('/');
+    var thread = path[2].split(':');
+
+    if( thread.length !== 2){
+        uiError('Bad path!');
+        return;
+    }
+
+    var board = path[1].split(':');
+    if( board.length !== 2){
+        uiError('Bad path!');
+    }
+
+    console.log("THREAD ID::   ", thread[1]);
+    new Promise(function(resolve, reject) {
+        submitNewPost(thread[1], resolve);
+
+    }).then(getPostsForThread(board[1], thread[1]));
+
+}
+
+function submitNewPost(threadId, resolve){
+    console.log(arguments.callee.name);
+
+    $.ajax({
+              url:"http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
+                            "&thread_post_body=" + escape(document.getElementById('newPostTextArea').value) + "&attachment_url=" +
+                             escape(document.getElementById('newPostAttachUrlInp').value),
+              type: "GET",
+              success: function(resp){console.log("post written successfully");
+                    if(resolve !== undefined) {
+                        resolve();
+                    }
+                },
+              error: function(){console.log("Error in submitNewThread");}
+          });
+}
 //xmlhttp.open("GET", "http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
                         //"&thread_post_body=" + escape(document.getElementById('newPostTextArea').value) + "&attachment_url="+escape(attachmentUrl));
 //xmlhttp.open("GET", "http://localhost:8089/api?command=addThread&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" +boardId +"&thread_name="+ escape(document.getElementById('newThreadTextArea').value) );
