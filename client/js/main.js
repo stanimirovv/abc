@@ -46,7 +46,7 @@
  function getTestPromise(){
     new Promise(function(resolve, reject) {
     $.ajax({
-              url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
+              url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
               type: "GET",
               success: function(){resolve({status: "ok"});},
               error: function(){reject("ERROR!");}
@@ -60,7 +60,7 @@
 function getBoards(resolve){
     console.log("Inside getBoards");
         $.ajax({
-                url: "http://127.0.0.1:8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
+                url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=getBoards&api_key=d3c3f756aff00db5cb063765b828e87b",
                 type: "GET",
                 success: function(resp){
                     boards = JSON.parse(resp);
@@ -108,14 +108,14 @@ function getActiveThreadsForBoardChain(boardId){
 function getActiveThreadsForBoard(boardId, resolve){
     console.log(arguments.callee.name);
     $.ajax({
-          url: "http://127.0.0.1:8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId,
+          url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=getActiveThreadsForBoard&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + boardId,
           type: "GET",
           success: function(resp){
               threads = JSON.parse(resp);
               if( threads.Status !== 'ok') {
                   alert(resp.Msg);
               }
-              var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newThreadPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="submitNewThreadChain()" value="Submit Thread!"  />';
+              var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="submitNewThreadChain()" value="Submit Thread!"  />';
               for(var i = 0; i < boards.Payload.length; i++){
                   if(boards.Payload[i].ID == boardId){
                       html += '<h1>' + boards.Payload[i].Name +'</h1>';
@@ -154,7 +154,7 @@ function getPostsForThread(boardId, threadId, resolve){
     console.log(arguments.callee.name);
 
     $.ajax({
-              url: "http://127.0.0.1:8089/api?command=getPostsForThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId,
+              url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=getPostsForThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId,
               type: "GET",
               success: function(resp ){
                         respObj = JSON.parse(resp);
@@ -199,7 +199,7 @@ function submitNewThreadChain(){
     }
 
     $.ajax({
-              url: "http://localhost:8089/api?command=addThread&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + board[1] + "&thread_name="
+              url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=addThread&api_key=d3c3f756aff00db5cb063765b828e87b&board_id=" + board[1] + "&thread_name="
                 + escape(document.getElementById('newThreadTextArea').value) ,
               type: "GET",
               success: function(resp){
@@ -207,7 +207,7 @@ function submitNewThreadChain(){
                   new Promise(function(resolve, reject) {
                       submitNewPost(respObj.Payload.ID, resolve);
 
-                  }).then(function(resolved){getPostsForThread(board[1], respObj.Payload.ID)});
+                  }).then(function(resolved){window.location.hash += '/t:' + respObj.Payload.ID.toString()});
               },
               error: function(){console.log("Error in submitNewThread");}
           });
@@ -241,8 +241,8 @@ function submitNewPost(threadId, resolve){
     console.log(arguments.callee.name);
     console.log("submitNewPost begin");
     $.ajax({
-              url:"http://localhost:8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
-                            "&thread_post_body=" + escape(document.getElementById('newThreadPostTextArea').value) + "&attachment_url=" +
+              url: window.location.protocol + '//' + window.location.hostname + ":8089/api?command=addPostToThread&api_key=d3c3f756aff00db5cb063765b828e87b&thread_id=" + threadId +
+                            "&thread_post_body=" + escape(document.getElementById('newPostTextArea').value) + "&attachment_url=" +
                              escape(document.getElementById('newPostAttachUrlInp').value),
               type: "GET",
               success: function(resp){console.log("post written successfully");
