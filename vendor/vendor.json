@@ -1,0 +1,43 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "HmbftipkadrLlCfzzVQ+iFHbl6g=",
+			"path": "github.com/golang/glog",
+			"revision": "23def4e6c14b4da8ac2ed8007337bc5eb5007998",
+			"revisionTime": "2016-01-25T20:49:56Z"
+		},
+		{
+			"checksumSHA1": "iIUYZyoanCQQTUaWsu8b+iOSPt4=",
+			"path": "github.com/gorilla/context",
+			"revision": "14f550f51af52180c2eefed15e5fd18d63c0a64a",
+			"revisionTime": "2014-06-04T16:11:50Z"
+		},
+		{
+			"checksumSHA1": "XX7Ae9Qxahgb4HjMWHnAE29js6w=",
+			"path": "github.com/gorilla/mux",
+			"revision": "4b8fbc56f3b2400a7c7ea3dba9b3539787c486b6",
+			"revisionTime": "2014-08-11T14:46:53Z"
+		},
+		{
+			"checksumSHA1": "aD4rUAIutk1HuMPBB93O2NwBLJ4=",
+			"path": "github.com/iambc/xerrors",
+			"revision": "19d10f2b74f745d4e165a59957099c62807f9248",
+			"revisionTime": "2016-03-03T16:13:02Z"
+		},
+		{
+			"checksumSHA1": "xB64naNkKuwFKUPkmdwdyY2mN6o=",
+			"path": "github.com/lib/pq",
+			"revision": "3cd0097429be7d611bb644ef85b42bfb102ceea4",
+			"revisionTime": "2016-03-14T19:42:24Z"
+		},
+		{
+			"checksumSHA1": "xppHi82MLqVx1eyQmbhTesAEjx8=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "3cd0097429be7d611bb644ef85b42bfb102ceea4",
+			"revisionTime": "2016-03-14T19:42:24Z"
+		}
+	],
+	"rootPath": "github.com/IamBc/abc"
+}
