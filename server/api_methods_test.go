@@ -2,9 +2,12 @@ package main
 
 import (
 	"testing"
+
+	"github.com/golang/glog"
 )
 
 func TestGetBoardsOk(t *testing.T) {
+	glog.Info(`TestGetBoardsOk`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -15,6 +18,7 @@ func TestGetBoardsOk(t *testing.T) {
 }
 
 func TestGetBoardsErr(t *testing.T) {
+	glog.Info(`TestGetBoardsErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -25,6 +29,7 @@ func TestGetBoardsErr(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardOk(t *testing.T) {
+	glog.Info(`TestGetActiveThreadsForBoardOk`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -35,6 +40,7 @@ func TestGetActiveThreadsForBoardOk(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardErr(t *testing.T) {
+	glog.Info(`TestGetActiveThreadsForBoardErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -45,6 +51,7 @@ func TestGetActiveThreadsForBoardErr(t *testing.T) {
 }
 
 func TestGetActiveThreadsForBoardEmpty(t *testing.T) {
+	glog.Info(`TestGetActiveThreadsForBoardEmpty`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -55,6 +62,7 @@ func TestGetActiveThreadsForBoardEmpty(t *testing.T) {
 }
 
 func TestGetPostsForThreadOk(t *testing.T) {
+	glog.Info(`TestGetPostsForThreadOk`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -65,6 +73,7 @@ func TestGetPostsForThreadOk(t *testing.T) {
 }
 
 func TestGetPostsForThreadEmpty(t *testing.T) {
+	glog.Info(`TestGetPostsForThreadEmpty`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -75,6 +84,7 @@ func TestGetPostsForThreadEmpty(t *testing.T) {
 }
 
 func TestGetPostsForThreadFail(t *testing.T) {
+	glog.Info(`TestGetPostsForThreadFail`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -86,6 +96,7 @@ func TestGetPostsForThreadFail(t *testing.T) {
 
 //addPostToThread(threadID int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
 func TestAddThreadErrLimit(t *testing.T) {
+	glog.Info(`TestAddThreadErrLimit`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -96,6 +107,7 @@ func TestAddThreadErrLimit(t *testing.T) {
 }
 
 func TestAddThreadErr(t *testing.T) {
+	glog.Info(`TestAddThreadErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -106,6 +118,7 @@ func TestAddThreadErr(t *testing.T) {
 }
 
 func TestAddThreadErrLimitOk(t *testing.T) {
+	glog.Info(`TestAddThreadErrLimitOk`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -116,6 +129,7 @@ func TestAddThreadErrLimitOk(t *testing.T) {
 }
 
 func TestAddThreadErrLimitUnhandledErr(t *testing.T) {
+	glog.Info(`TestAddThreadErrLimitUnhandledErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -129,6 +143,7 @@ var str = `a`
 
 //addPostToThread(threadID int, threadBodyPost string, attachmentUrl *string, clientRemoteAddr string)
 func TestAddPostErrLimit(t *testing.T) {
+	glog.Info(`TestAddPostErrLimit`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -139,6 +154,7 @@ func TestAddPostErrLimit(t *testing.T) {
 }
 
 func TestAddPostErr(t *testing.T) {
+	glog.Info(`TestAddPostErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -149,6 +165,7 @@ func TestAddPostErr(t *testing.T) {
 }
 
 func TestAddPostErrLimitLen(t *testing.T) {
+	glog.Info(`TestAddPostErrLimitLen`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -158,6 +175,7 @@ func TestAddPostErrLimitLen(t *testing.T) {
 	}
 }
 func TestAddPostErrLimitUnhandledErr(t *testing.T) {
+	glog.Info(`TestAddPostErrLimitUnhandledErr`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -168,6 +186,7 @@ func TestAddPostErrLimitUnhandledErr(t *testing.T) {
 }
 
 func TestAddPost1(t *testing.T) {
+	glog.Info(`TestAddPost1`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
@@ -178,6 +197,7 @@ func TestAddPost1(t *testing.T) {
 }
 
 func TestAddPostOk(t *testing.T) {
+	glog.Info(`TestAddPostOk`)
 	var api abcAPI
 	wrdb := writermock{}
 	api.wr = &wrdb
