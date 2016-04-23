@@ -161,7 +161,11 @@ function getPostsForThread(boardId, threadId, resolve){
 
                         if(respObj.Payload !== null && respObj.Payload.length !== null ){
                             for(var i =0; i < respObj.Payload.length; i++){
-                                html += '<div class="postBox">' + respObj.Payload[i].Body + '</div>';
+                                var attachmentHtml = '';
+                                if(respObj.Payload[i].AttachmentURL !== null && respObj.Payload[i].AttachmentURL !== undefined){
+                                    attachmentHtml = '<br/><a href="'+ respObj.Payload[i].AttachmentURL +'"> attachment</a>';
+                                }
+                                html += '<div class="postBox">' + respObj.Payload[i].Body + attachmentHtml +'</div>';
                             }
                         }
                         if(resolve !== undefined){
