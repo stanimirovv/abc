@@ -196,7 +196,7 @@ function submitNewThreadChain(){
                   new Promise(function(resolve, reject) {
                       submitNewPost(respObj.Payload.ID, resolve);
 
-                  }).then(function(resolved){window.location.hash += '/t:' + respObj.Payload.ID.toString()});
+                  }).then(function(resolved){boards.Status = undefined; window.location.hash += '/t:' + respObj.Payload.ID.toString()});
               },
               error: function(){uiError("Error in submitNewThread");}
           });
