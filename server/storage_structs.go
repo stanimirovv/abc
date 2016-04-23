@@ -43,7 +43,7 @@ type threadPosts struct {
 	ID            int
 	Body          string
 	threadID      int
-	attachmentURL *string
+	AttachmentURL *string
 	InsertedAt    time.Time
 	SourceIP      *string
 }
