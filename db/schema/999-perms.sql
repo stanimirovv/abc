@@ -8,6 +8,6 @@ GRANT USAGE     ON threads_id_seq       TO abc_api;
 GRANT SELECT    ON boards               TO abc_api;
 GRANT USAGE     ON boards_id_seq        TO abc_api;
 GRANT SELECT    ON image_board_clusters TO abc_api;
-GRANT USAGE     ON image_board_clusters_id_seq TO acd_api;
+GRANT USAGE     ON image_board_clusters_id_seq TO abc_api;
 GRANT SELECT    ON thread_limits_reached_actions TO abc_api;
 GRANT USAGE     ON thread_limits_reached_actions_id_seq TO abc_api;

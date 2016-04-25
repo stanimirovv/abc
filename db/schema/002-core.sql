@@ -4,7 +4,7 @@ CREATE TABLE image_board_clusters(id serial primary key,
                                   name text not null,
                                   descr text not null,
                                   long_descr text,
-                                  api_key text not null default,
+                                  api_key text not null,
                                   board_limit_count INT NOT NULL default 99999
                                   );
 
@@ -49,7 +49,7 @@ CREATE TABLE thread_posts(id serial primary key,
                           body text not null,
                           thread_id INT REFERENCES threads,
                           attachment_url TEXT,
-                          inserted_at timestamp with timezone not null default now(),
+                          inserted_at timestamp with time zone not null default now(),
                           source_ip TEXT);
                           -- todo limits);
 CREATE TABLE apis(
