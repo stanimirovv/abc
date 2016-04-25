@@ -164,6 +164,11 @@ function getPostsForThread(boardId, threadId, resolve){
                                 var attachmentHtml = '';
                                 if(respObj.Payload[i].AttachmentURL !== null && respObj.Payload[i].AttachmentURL !== undefined){
                                     attachmentHtml = '<br/><a href="'+ respObj.Payload[i].AttachmentURL +'"> attachment</a>';
+
+                                    //get hostname of attachment
+                                    var a = document.createElement('a');
+                                    a.href = respObj.Payload[i].AttachmentURL;
+                                    attachmentHtml += '&nbsp;&nbsp;&nbsp;<span>(site: '+ a.hostname +')</span>';
                                 }
                                 html += '<div class="postBox">' + respObj.Payload[i].Body + attachmentHtml +'</div>';
                             }
