@@ -116,7 +116,8 @@ function getActiveThreadsForBoard(boardId, resolve){
               }
               if(threads.Payload !== null){ // there are active threads
                 for (var i = 0; i < threads.Payload.length; i++){
-                    html += '<a href="'+ window.location.hash + '/thread:' + threads.Payload[i].ID +'" class="thread">'+ threads.Payload[i].Name +'</a><br/>';
+                    html += '<a href="'+ window.location.hash + '/thread:' + threads.Payload[i].ID +'" class="thread">'+ threads.Payload[i].Name +'</a><span>&nbsp;&nbsp; (P:' +
+                        +threads.Payload[i].PostCount.toString()  +' I:'+ threads.Payload[i].PostCountWithAttachment.toString() +')</span><br/>';
                 }
               }
               $("#app").html(html);
