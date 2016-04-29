@@ -104,16 +104,20 @@ function getActiveThreadsForBoard(boardId, resolve){
           success: function(resp){
               threads = JSON.parse(resp);
               if( threads.Status !== 'ok') {
-                  alert(resp.Msg);
+                  //alert(resp.Msg);
               }
               var html = '<p>Thread name:</p><textarea rows="4" cols="50" id="newThreadTextArea"></textarea><br/><p>Post content:</p><textarea rows="4" cols="50" id="newPostTextArea"></textarea><br/><p>Post Url:</p><input id="newPostAttachUrlInp" type="text" /><br/><input class="btn btn-primary" type="button" onclick="submitNewThreadChain()" value="Submit Thread!"  />';
-              for(var i = 0; i < boards.Payload.length; i++){
-                  if(boards.Payload[i].ID == boardId){
-                      html += '<h1>' + boards.Payload[i].Name +'</h1>';
-                  }
+              if(boards.Payload !== null) {
+                for(var i = 0; i < boards.Payload.length; i++){
+                    if(boards.Payload[i].ID == boardId){
+                          html += '<h1>' + boards.Payload[i].Name +'</h1>';
+                    }
+                }
               }
-              for (var i = 0; i < threads.Payload.length; i++){
-                  html += '<a href="'+ window.location.hash + '/thread:' + threads.Payload[i].ID +'" class="thread">'+ threads.Payload[i].Name +'</a><br/>';
+              if(threads.Payload !== null){ // there are active threads
+                for (var i = 0; i < threads.Payload.length; i++){
+                    html += '<a href="'+ window.location.hash + '/thread:' + threads.Payload[i].ID +'" class="thread">'+ threads.Payload[i].Name +'</a><br/>';
+                }
               }
               $("#app").html(html);
               if(resolve !== undefined){
