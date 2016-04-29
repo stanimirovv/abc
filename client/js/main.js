@@ -56,9 +56,11 @@ function getBoards(resolve){
                     }
 
                     var html = '';
-                    for (var i = 0; i < boards.Payload.length; i++){
-                        console.log(boards.Payload[i]);
-                        html += '<a href="#s/board:' +  boards.Payload[i].ID +'">'+ boards.Payload[i].Name +'</a><br/>';
+                    if(boards.Payload.length !== undefined ){ // when there are no active threads
+                        for (var i = 0; i < boards.Payload.length; i++){
+                            console.log(boards.Payload[i]);
+                            html += '<a href="#s/board:' +  boards.Payload[i].ID +'">'+ boards.Payload[i].Name +'</a><br/>';
+                        }
                     }
                 if(resolve !== undefined){
                     resolve();
