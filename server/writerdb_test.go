@@ -104,3 +104,54 @@ func TestIsPostLimitReached(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestPostAndThreadInsert(t *testing.T) {
+	glog.Info(`TestPostAndThreadInsert`)
+	dbConnString := os.Getenv("ABC_DB_CONN_STRING")
+	db, _ := sql.Open("postgres", dbConnString)
+	var api abcAPI
+	wrdb := writerrdb{db}
+	api.wr = &wrdb
+	thread, err := wrdb.addThread(1, `Test thread`)
+	if err != nil {
+		glog.Error("Error: ", err)
+		t.Fail()
+	}
+
+	//Posts
+
+	err = wrdb.addPostToThread(thread.ID, "a", nil, "a")
+
+	if err != nil {
+		glog.Error("Error: ", err)
+		t.Fail()
+	}
+
+	stmt, err := db.Prepare(`DELETE FROM thread_posts WHERE thread_id = $1;`)
+	if err != nil {
+		glog.Error("Error: ", err)
+		t.Fail()
+	}
+
+	_, err = stmt.Exec(thread.ID)
+
+	if err != nil {
+		glog.Error("Error: ", err)
+		t.Fail()
+	}
+
+	//Clean up thread
+
+	stmt, err = db.Prepare(`DELETE FROM THREADS WHERE id = $1;`)
+	if err != nil {
+		glog.Fatal(err)
+		t.Fail()
+	}
+	_, err = stmt.Exec(thread.ID)
+	if err != nil {
+		glog.Fatal(err)
+		t.Fail()
+	}
+
+	glog.Info(`Thread id: `, thread.ID)
+}
