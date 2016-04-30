@@ -169,7 +169,8 @@ function getPostsForThread(boardId, threadId, resolve){
                         if(respObj.Payload !== null && respObj.Payload.length !== null ){
                             for(var i =0; i < respObj.Payload.length; i++){
                                 var attachmentHtml = '';
-                                if(respObj.Payload[i].AttachmentURL !== null && respObj.Payload[i].AttachmentURL !== undefined){
+                                if(respObj.Payload[i].AttachmentURL !== null && respObj.Payload[i].AttachmentURL !== undefined
+                                        && respObj.Payload[i].AttachmentURL !== ''){
                                     attachmentHtml = '<br/><a href="'+ respObj.Payload[i].AttachmentURL +'"> attachment</a>';
 
                                     //get hostname of attachment
