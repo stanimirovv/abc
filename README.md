@@ -37,7 +37,7 @@ The system configuration is set in the run_server.sh file which creates the envi
 binary.
 
 | Setting Name   |      Description     |  Example |
-|----------|:-------------:|------:|
+|----------|-------------|------|
 | ABC_SERVER_ENDPOINT_URL|  Port for the API | 8089 |
 |  ABC_DB_CONN_STRING | Connection script to the SQL driver (currently only postgres is supported)      | user=abc_api password=123 dbname=abc_dev_cluster sslmode=disable  |
 | ABC_FILES_DIR | path to the (web) client files which must be hosted |   ./client/  |
@@ -50,7 +50,7 @@ binary.
 ## Code structure
 
 | Directory   | Description |
-|----------|:-------------:|
+|----------|-------------|
 |client| Contains all web client files|
 |server| Contains all source server files, including the tests|
 |db/schema/| Contains schema and permissions for the DB. (Currently only postgres is supported)|
@@ -61,6 +61,9 @@ binary.
 ## API
 The API uses query parameters and the HTTP GET method. The API command is also passed as a querry parameter.
 Since query parameters are used, you must url encode the payload.
+
+
+
 
 TODO: Functions
 
