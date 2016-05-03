@@ -117,7 +117,7 @@ curl http://<domain>:<api_port>/api?command=addPostToThread&api_key=<my api key>
 
 ### addThread
 
-Fetches the available boards for a board cluster.
+Creates a new thread to an existing board.
 
 #### parameters
 * api_key: The api_key identifying the board cluster.
