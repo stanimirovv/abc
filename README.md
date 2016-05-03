@@ -69,14 +69,63 @@ Since query parameters are used, you must url encode the payload.
 
 Fetches the available boards for a board cluster.
 
-#### parameters
+#### Parameters
 * api_key: The api_key identifying the board cluster.
 
 #### Example call
 
-curl http://<domain>:<api_port>/api?getBoards&api_key=<my api key>
+curl http://<domain>:<api_port>/api?command=getBoards&api_key=<my api key>
+
+### getActiveThreadsForBoard
+
+Fetches the available threads for a board.
+
+#### Parameters
+* api_key: The api_key identifying the board cluster.
+* board_id: The unique  id of the board.
+
+#### Example call
+
+curl http://<domain>:<api_port>/api?command=getActiveThreadsForBoard&api_key=<my api key>&board_id=<my board id>
 
 
-## API Examples
+### getPostsForThread
 
-todo
+Gets the posts for a given thread.
+
+#### Parameters
+* api_key: The api_key identifying the board cluster.
+* thread_id: The unique  id of the thread.
+
+#### Example call
+
+curl http://<domain>:<api_port>/api?command=getPostsForThread&api_key=<my api key>&thread_id=<my thread id>
+
+### addPostToThread
+
+Adds a new post to an existing thread.
+
+#### Parameters
+* api_key: The api_key identifying the board cluster.
+* thread_id: The unique  id of the thread.
+* thread_post_body: Body of the post
+* thread_attachment_url: URL of the thread
+
+#### Example call
+
+curl http://<domain>:<api_port>/api?command=addPostToThread&api_key=<my api key>&thread_id=<thread id>&thread_post_body=<body>&thread_attachment_url=<url>
+
+### addThread
+
+Fetches the available boards for a board cluster.
+
+#### parameters
+* api_key: The api_key identifying the board cluster.
+* board_id: The unique  id of the board.
+* thread_post_body: Body of the post
+* thread_attachment_url: URL of the thread
+
+
+#### Example call
+
+curl http://<domain>:<api_port>/api?command=addThread&api_key=<my api key>&board_id=<board id>&thread_post_body=<body>&thread_attachment_url=<url>
