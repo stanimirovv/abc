@@ -65,7 +65,16 @@ Since query parameters are used, you must url encode the payload.
 
 
 
-TODO: Functions
+### getBoards
+
+Fetches the available boards for a board cluster.
+
+#### parameters
+* api_key: The api_key identifying the board cluster.
+
+#### Example call
+
+curl http://<domain>:<api_port>/api?getBoards&api_key=<my api key>
 
 
 ## API Examples
