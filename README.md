@@ -49,10 +49,21 @@ binary.
 
 ## Code structure
 
-todo
+| Directory   | Description |
+|----------|:-------------:|
+|client| Contains all web client files|
+|server| Contains all source server files, including the tests|
+|db/schema/| Contains schema and permissions for the DB. (Currently only postgres is supported)|
+|vendor| Contains external golang dependencies|
+| cdn | Depricated, will be removed |
+| cdn-client | Depricated, will be removed |
 
 ## API
-todo
+The API uses query parameters and the HTTP GET method. The API command is also passed as a querry parameter.
+Since query parameters are used, you must url encode the payload.
+
+TODO: Functions
+
 
 ## API Examples
 
