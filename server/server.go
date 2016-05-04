@@ -57,7 +57,7 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 	var resp []byte
 	var err error
 	if command[0] == `getBoards` {
-		apiKey, isPassed := values[`api_key`]
+		apiKey, isPassed := values["api_key"]
 		if !isPassed {
 			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
 			return
@@ -152,6 +152,16 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
 		glog.Error("command: ", command[0])
 	}
+	/*else if command[0] == `getConfig` {
+		boardID, isPassed := values[`board_id`]
+		if !isPassed {
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'board_id' is undefined.","Payload":null}`))
+			return
+		}
+		boardIDInt, err := strconv.Atoi(boardID[0])
+		resp, err := api.getConfig(boardIDInt)
+
+	}*/
 
 	if err != nil {
 		if string(reflect.TypeOf(err).Name()) == `XError` {
