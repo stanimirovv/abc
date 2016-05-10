@@ -11,6 +11,7 @@ type imageBoardClusters struct {
 	Descr           string
 	LongDescr       string
 	BoardLimitCount int
+	SettingsJSON    string
 }
 
 type boards struct {
