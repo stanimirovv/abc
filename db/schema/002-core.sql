@@ -5,7 +5,8 @@ CREATE TABLE image_board_clusters(id serial primary key,
                                   descr text not null,
                                   long_descr text,
                                   api_key text not null,
-                                  board_limit_count INT NOT NULL default 99999
+                                  board_limit_count INT NOT NULL default 99999,
+                                  settings_json TEXT
                                   );
 
 CREATE TABLE thread_limits_reached_actions(
@@ -14,9 +15,9 @@ CREATE TABLE thread_limits_reached_actions(
                                             descr text
 );
 
-INSERT INTO thread_limits_reached_actions VALUES(1, 'archive', 'Thread will not be displayed, but present in the admin panel.'); 
-INSERT INTO thread_limits_reached_actions VALUES(2, 'delete', 'Thread will be deleted.'); 
-INSERT INTO thread_limits_reached_actions VALUES(3, 'read_only', 'Thread will be displayed but users will not be able to post in it.'); 
+INSERT INTO thread_limits_reached_actions VALUES(1, 'archive', 'Thread will not be displayed, but present in the admin panel.');
+INSERT INTO thread_limits_reached_actions VALUES(2, 'delete', 'Thread will be deleted.');
+INSERT INTO thread_limits_reached_actions VALUES(3, 'read_only', 'Thread will be displayed but users will not be able to post in it.');
 
 CREATE TABLE boards(id serial primary key,
                     name text not null,
@@ -29,8 +30,8 @@ CREATE TABLE boards(id serial primary key,
                     thread_setting_limits_reached_action_id INT REFERENCES thread_limits_reached_actions
                     );
 -- Board total posts count ?
--- Board total attachments count ? 
--- Max views ? 
+-- Board total attachments count ?
+-- Max views ?
 -- Time expires at
 -- Date expires at
 
@@ -55,8 +56,7 @@ CREATE TABLE thread_posts(id serial primary key,
 CREATE TABLE apis(
     id SERIAL PRIMARY KEY,
     api_key TEXT NOT NULL DEFAULT md5(now()::text || (random() * 10000 + 1)::text),
-    key_get_param_name TEXT NOT NULL default 'api_key', 
+    key_get_param_name TEXT NOT NULL default 'api_key',
     is_https BOOLEAN NOT NULL DEFAULT false,
     https_cert_file TEXT
 );
-
