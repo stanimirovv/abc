@@ -6,7 +6,7 @@ CREATE TABLE image_board_clusters(id serial primary key,
                                   long_descr text,
                                   api_key text not null,
                                   board_limit_count INT NOT NULL default 99999,
-                                  settings_json TEXT
+                                  settings_json TEXT NOT NULL default '{}'
                                   );
 
 CREATE TABLE thread_limits_reached_actions(
