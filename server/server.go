@@ -148,6 +148,14 @@ func QueryStringHandler(res http.ResponseWriter, req *http.Request) {
 		}
 		resp, err = api.addThread(boardIDInt, threadName[0])
 
+	} else if command[0] == `getImageBoardClusterByApiKey` {
+		apiKey, isPassed := values["api_key"]
+		if !isPassed {
+			res.Write([]byte(`{"Status":"error","Msg":"Parameter 'api_key' is undefined.","Payload":null}`))
+			return
+		}
+		resp, err = api.getImageBoardClusterByApiKey(apiKey[0])
+
 	} else {
 		res.Write([]byte(`{"Status":"error","Msg":"No such command exists.","Payload":null}`))
 		glog.Error("command: ", command[0])

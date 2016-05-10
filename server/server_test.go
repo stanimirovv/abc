@@ -209,3 +209,20 @@ func TestAPIGetActiveThreadsForBoard(t *testing.T) {
 	}
 	glog.Info(`resp: `, resp)
 }
+
+func TestServerGetImageBoardClusterByApiKeyOk(t *testing.T) {
+	//glog.Info(`TestAPIGetBoards`)
+	wr := writermock{}
+	api.wr = &wr
+
+	h := MyHandler{}
+	server := httptest.NewServer(&h)
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "?command=getImageBoardClusterByApiKey&api_key=1")
+	if err != nil {
+		glog.Fatal("err: ", err)
+		t.Fail()
+	}
+	glog.Info(`resp: `, resp)
+}
