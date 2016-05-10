@@ -138,3 +138,18 @@ func (api *abcAPI) addThread(boardID int, threadName string) ([]byte, error) {
 
 	return bytes, nil
 }
+
+func (api *abcAPI) getImageBoardClusterByApiKey(apiKey string) ([]byte, error) {
+	ibc, err := api.wr.getImageBoardClusterByApiKey(apiKey)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	var bytes []byte
+	bytes, err = json.Marshal(apiRequest{"ok", nil, &ibc})
+	if err != nil {
+		return []byte{}, xerrors.NewSysErr()
+	}
+
+	return bytes, nil
+}

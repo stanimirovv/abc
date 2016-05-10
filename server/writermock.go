@@ -72,3 +72,11 @@ func (db *writermock) isPostLimitReached(threadID int) (bool, threads, error) {
 }
 
 func (db *writermock) archiveThread(threadID int) {}
+
+func (db *writermock) getImageBoardClusterByApiKey(apiKey string) (imageBoardClusters, error) {
+	var ibc imageBoardClusters
+	if apiKey == `1` {
+		return ibc, nil
+	}
+	return ibc, xerrors.NewSysErr()
+}

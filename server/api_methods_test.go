@@ -206,3 +206,23 @@ func TestAddPostOk(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestAPIGetImageBoardClusterByApiKeyOk(t *testing.T) {
+	var api abcAPI
+	wrdb := writermock{}
+	api.wr = &wrdb
+	_, err := api.getImageBoardClusterByApiKey(`1`)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestAPIGetImageBoardClusterByApiKeyFail(t *testing.T) {
+	var api abcAPI
+	wrdb := writermock{}
+	api.wr = &wrdb
+	_, err := api.getImageBoardClusterByApiKey(`2`)
+	if err == nil {
+		t.Fail()
+	}
+}
