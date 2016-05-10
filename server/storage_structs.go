@@ -8,10 +8,11 @@ type app struct {
 
 type imageBoardClusters struct {
 	ID              int
-	Descr           string
-	LongDescr       string
+	Descr           *string
+	LongDescr       *string
 	BoardLimitCount int
-	SettingsJSON    string
+	SettingsJSON    *string
+	APIKey          string
 }
 
 type boards struct {
