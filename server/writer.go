@@ -10,4 +10,5 @@ type Writer interface {
 	isThreadLimitReached(boardID int) (bool, error)
 	isPostLimitReached(threadID int) (bool, threads, error)
 	archiveThread(threadID int)
+	getImageBoardClusterByApiKey(apiKey string) (imageBoardClusters, error)
 }
