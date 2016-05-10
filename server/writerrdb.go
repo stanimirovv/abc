@@ -125,3 +125,25 @@ func (db *writerrdb) isPostLimitReached(threadID int) (bool, threads, error) {
 func (db *writerrdb) archiveThread(threadID int) {
 	db.QueryRow("UPDATE threads set is_active = false where ID = $1", threadID).Scan()
 }
+
+func (db *writerrdb) getImageBoardClusterByApiKey(apiKey string) (imageBoardClusters, error) {
+	var ibc imageBoardClusters
+	rows, err := db.Query(`SELECT id, descr, long_descr, api_key, settings_json FROM image_board_clusters where api_key = $1;`, apiKey)
+	if err != nil {
+		glog.Error(err)
+		return ibc, xerrors.NewSysErr()
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&ibc.ID, &ibc.Descr, &ibc.LongDescr, &ibc.APIKey, &ibc.SettingsJSON)
+		if err != nil {
+			glog.Error(err)
+			return ibc, xerrors.NewSysErr()
+		}
+	}
+	if ibc.ID == 0 {
+		return ibc, xerrors.NewUIErr(`Non existing image board cluster!`, "apiKey: "+apiKey, `100`, false)
+	}
+	return ibc, err
+}

@@ -155,3 +155,31 @@ func TestPostAndThreadInsert(t *testing.T) {
 
 	glog.Info(`Thread id: `, thread.ID)
 }
+
+func TestGetImageBoardClusterByApiKeyOk(t *testing.T) {
+	glog.Info(`TestGetImageBoardClusterByApiKey`)
+	dbConnString := os.Getenv("ABC_DB_CONN_STRING")
+	db, _ := sql.Open("postgres", dbConnString)
+	var api abcAPI
+	wrdb := writerrdb{db}
+	api.wr = &wrdb
+
+	_, err := wrdb.getImageBoardClusterByApiKey(`d3c3f756aff00db5cb063765b828e87b`)
+	if err != nil {
+		t.Fail()
+	}
+}
+
+func TestGetImageBoardClusterByApiKeyFail(t *testing.T) {
+	glog.Info(`TestGetImageBoardClusterByApiKey`)
+	dbConnString := os.Getenv("ABC_DB_CONN_STRING")
+	db, _ := sql.Open("postgres", dbConnString)
+	var api abcAPI
+	wrdb := writerrdb{db}
+	api.wr = &wrdb
+
+	_, err := wrdb.getImageBoardClusterByApiKey(`d3c3`)
+	if err == nil {
+		t.Fail()
+	}
+}
